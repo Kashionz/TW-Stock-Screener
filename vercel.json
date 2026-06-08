@@ -1,0 +1,19 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "functions": {
+    "api/snapshot.js": {
+      "maxDuration": 30,
+      "includeFiles": "data/latest-snapshot.json"
+    },
+    "api/refresh.js": {
+      "maxDuration": 300
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/refresh",
+      "schedule": "30 10 * * 1-5"
+    }
+  ]
+}
