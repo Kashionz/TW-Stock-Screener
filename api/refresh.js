@@ -9,7 +9,12 @@ export async function GET(request) {
   try {
     const config = getRuntimeConfig();
     assertAuthorizedBearerToken(request.headers.get("authorization"), config);
-    return Response.json(await refreshSnapshot({ target: "blob" }));
+    return Response.json(
+      await refreshSnapshot({
+        target: "blob",
+        blobPath: config.snapshotBlobPath,
+      }),
+    );
   } catch (error) {
     if (error instanceof UnauthorizedError) {
       return Response.json(

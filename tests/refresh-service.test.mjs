@@ -1,8 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { SNAPSHOT_BLOB_PATH } from "../lib/snapshot-store.js";
-
 function createSnapshot() {
   return {
     meta: {
@@ -60,20 +58,28 @@ test("refreshSnapshot writes local snapshots in local mode", async () => {
 test("refreshSnapshot writes blob snapshots in blob mode", async () => {
   const { refreshSnapshot } = await import("../lib/refresh-service.js");
   const snapshot = createSnapshot();
+  let writeOptions = null;
 
   const result = await refreshSnapshot({
     target: "blob",
+    blobPath: "custom/latest.json",
     buildSnapshotImpl: async () => snapshot,
     writeLocalSnapshotImpl: async () => {
       throw new Error("local write should not be called");
     },
-    writeBlobSnapshotImpl: async () => ({
-      url: "https://blob.example/latest.json",
-    }),
+    writeBlobSnapshotImpl: async (_payload, options) => {
+      writeOptions = options;
+      return {
+        url: "https://blob.example/latest.json",
+      };
+    },
   });
 
   assert.equal(result.ok, true);
-  assert.equal(result.blobPath, SNAPSHOT_BLOB_PATH);
+  assert.deepEqual(writeOptions, {
+    blobPath: "custom/latest.json",
+  });
+  assert.equal(result.blobPath, "custom/latest.json");
   assert.equal(result.blobUrl, "https://blob.example/latest.json");
   assert.equal(result.localPath, null);
   assert.deepEqual(result.top5, expectedTop5());
