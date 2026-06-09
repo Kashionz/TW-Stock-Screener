@@ -44,3 +44,16 @@ test("loadSnapshot falls back to local data when blob load fails", async () => {
 
   assert.equal(result, localSnapshot);
 });
+
+test("loadSnapshot falls back to local data when blob load returns null", async () => {
+  const { loadSnapshot } = await import("../lib/snapshot-service.js");
+  const localSnapshot = { source: "local", items: ["local"] };
+
+  const result = await loadSnapshot({
+    source: "best",
+    readLocalSnapshotImpl: async () => localSnapshot,
+    readBlobSnapshotImpl: async () => null,
+  });
+
+  assert.equal(result, localSnapshot);
+});
