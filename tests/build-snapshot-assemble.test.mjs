@@ -114,6 +114,77 @@ test("assembleSnapshot reads TPEX-specific keys", async () => {
   assert.equal(gws.eps, 3.2); // 每股盈餘
 });
 
+test("assembleSnapshot preserves TPEX event-only change text when a close price exists", async () => {
+  const { assembleSnapshot } = await import("../lib/build-snapshot.js");
+
+  const inputs = fixtureInputs();
+  inputs.tpexPrice = [{ SecuritiesCompanyCode: "6488", Close: "500", Change: "除息 " }];
+
+  const gws = assembleSnapshot(inputs).rows.find((row) => row.code === "6488");
+
+  assert.equal(gws.price, 500);
+  assert.equal(gws.chg, null);
+  assert.equal(gws.chgText, "除息");
+});
+
+test("assembleSnapshot uses the latest available valuation or price date across markets", async () => {
+  const { assembleSnapshot } = await import("../lib/build-snapshot.js");
+
+  const inputs = fixtureInputs();
+  inputs.tpexValuation[0].Date = "1150609";
+  inputs.tpexPrice[0].Date = "1150609";
+
+  const { meta } = assembleSnapshot(inputs);
+
+  assert.equal(meta.valDateROC, "1150609");
+});
+
+test("parseTwseMiIndexPriceRows normalizes listed close prices from the daily market report", async () => {
+  const { parseTwseMiIndexPriceRows } = await import("../lib/build-snapshot.js");
+
+  const payload = {
+    stat: "OK",
+    date: "20260609",
+    tables: [
+      {
+        fields: [
+          "證券代號",
+          "證券名稱",
+          "成交股數",
+          "成交筆數",
+          "成交金額",
+          "開盤價",
+          "最高價",
+          "最低價",
+          "收盤價",
+          "漲跌(+/-)",
+          "漲跌價差",
+        ],
+        data: [
+          ["6209", "今國光", "22,080,043", "12,983", "1,905,614,984", "80.50", "88.00", "80.50", "88.00", "+", "8.00"],
+          ["2330", "台積電", "10,000", "100", "9,500,000", "950.00", "955.00", "948.00", "950.00", "-", "5.00"],
+        ],
+      },
+    ],
+  };
+
+  const rows = parseTwseMiIndexPriceRows(payload);
+
+  assert.deepEqual(rows, [
+    { Date: "1150609", Code: "6209", Name: "今國光", ClosingPrice: "88.00", Change: "8.00" },
+    { Date: "1150609", Code: "2330", Name: "台積電", ClosingPrice: "950.00", Change: "-5.00" },
+  ]);
+});
+
+test("buildTwseMiIndexUrl pins the listed market report to a specific calendar day", async () => {
+  const { buildTwseMiIndexUrl } = await import("../lib/build-snapshot.js");
+
+  assert.equal(
+    buildTwseMiIndexUrl("20260609"),
+    "https://www.twse.com.tw/rwd/zh/afterTrading/MI_INDEX?response=json&type=ALLBUT0999&date=20260609",
+  );
+});
+
 test("assembleSnapshot tolerates missing optional datasets", async () => {
   const { assembleSnapshot } = await import("../lib/build-snapshot.js");
 

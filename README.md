@@ -31,7 +31,7 @@ The UI is built as a static HTML app, while the latest dataset is served through
 
 ### Prerequisites
 
-- Node.js 20.x
+- Node.js 24.x
 - Vercel CLI is required before `npm run dev:vercel` can run successfully.
 
 ### Install
@@ -111,9 +111,9 @@ Use `npm run dev` for the daily Node-based smoke test, then `npm run dev:vercel`
 ## Deployment Notes
 
 - The project is configured for Vercel.
-- Deployments are triggered from GitHub Actions instead of Vercel's built-in Git integration.
-- Add these repository secrets before enabling the workflow: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`.
-- Pushes to non-`main` branches create Vercel preview deployments; pushes to `main` create the production deployment.
-- `vercel.json` disables Vercel's native Git auto-deploy so the GitHub workflow remains the single deployment path.
+- Connect the GitHub repository directly in Vercel to enable automatic Preview deployments for branches and pull requests.
+- Set the production branch in Vercel to `main` so merges to `main` create production deployments automatically.
+- Configure runtime secrets such as `BLOB_READ_WRITE_TOKEN`, `CRON_SECRET`, and `REFRESH_SECRET` in the Vercel project settings instead of GitHub Actions secrets.
+- The GitHub Actions workflow now runs verification only; Vercel handles the actual deployments from the connected repository.
 - Scheduled refresh is defined in `vercel.json`.
 - Historical HTML snapshots under `versions/` are kept in the repository, but excluded from Vercel deployment via `.vercelignore`.

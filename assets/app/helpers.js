@@ -46,6 +46,11 @@ export function pct(value) {
   return `<span class="${className}">${value >= 0 ? "+" : ""}${text}</span>`;
 }
 
+export function formatChange(row) {
+  if (row?.chgText) return `<span class="muted">${escapeHtml(row.chgText)}</span>`;
+  return pct(row?.chg);
+}
+
 export function ymLabel(value) {
   const label = String(value);
   return `${Number.parseInt(label.slice(0, 3), 10) + 1911 - 2000}/${label.slice(3)}`;

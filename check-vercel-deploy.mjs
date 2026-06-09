@@ -18,7 +18,7 @@ const vercelWorkflow = readFileSync(join(rootDir, ".github", "workflows", "verce
 const frontendSource = readFrontendSource();
 
 expect(packageJson.dependencies?.["@vercel/blob"] === "2.4.0", "missing @vercel/blob dependency");
-expect(packageJson.engines?.node === "20.x", "unexpected Node engine range");
+expect(packageJson.engines?.node === "24.x", "unexpected Node engine range");
 expect(packageJson.scripts?.dev === "node ./scripts/dev-server.mjs", "missing npm dev script");
 expect(packageJson.scripts?.["dev:vercel"] === "vercel dev", "missing npm dev:vercel script");
 expect(packageJson.scripts?.test === "node --test tests/*.test.mjs", "unexpected npm test script");
@@ -28,8 +28,8 @@ expect(
   "missing Vercel cron for /api/refresh",
 );
 expect(
-  vercelJson.git?.deploymentEnabled === false,
-  "vercel.json should disable built-in Git deployments",
+  vercelJson.git == null || vercelJson.git.deploymentEnabled !== false,
+  "vercel.json should not disable Vercel Git deployments",
 );
 
 const globalHeaderRule = (vercelJson.headers || []).find(
@@ -82,32 +82,19 @@ expect(vercelWorkflow.includes("npm test"), "workflow does not run npm test");
 expect(vercelWorkflow.includes("npm run check:ui"), "workflow does not run UI checks");
 expect(vercelWorkflow.includes("npm run check:deploy"), "workflow does not run deploy checks");
 expect(
-  vercelWorkflow.includes("VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}"),
-  "workflow does not load VERCEL_ORG_ID secret",
+  vercelWorkflow.includes("pull_request:"),
+  "workflow does not verify pull requests",
 );
 expect(
-  vercelWorkflow.includes("VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}"),
-  "workflow does not load VERCEL_PROJECT_ID secret",
+  vercelWorkflow.includes("branches:\n      - main"),
+  "workflow does not verify pushes to main",
 );
 expect(
-  vercelWorkflow.includes("vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}"),
-  "workflow does not pull the Vercel preview environment",
-);
-expect(
-  vercelWorkflow.includes("vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}"),
-  "workflow does not deploy Vercel preview builds",
-);
-expect(
-  vercelWorkflow.includes("vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}"),
-  "workflow does not pull the Vercel production environment",
-);
-expect(
-  vercelWorkflow.includes("vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}"),
-  "workflow does not build Vercel production artifacts",
-);
-expect(
-  vercelWorkflow.includes("vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}"),
-  "workflow does not deploy Vercel production builds",
+  !vercelWorkflow.includes("VERCEL_TOKEN") &&
+    !vercelWorkflow.includes("vercel pull") &&
+    !vercelWorkflow.includes("vercel build") &&
+    !vercelWorkflow.includes("vercel deploy"),
+  "workflow should not perform Vercel CLI deployments",
 );
 
 console.log("Vercel deployment files verified.");
