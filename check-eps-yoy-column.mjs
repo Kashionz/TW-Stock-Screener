@@ -1,46 +1,25 @@
-import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { readFrontendSource, readIndexHtml } from "./check-frontend-source.mjs";
 
-const rootDir = fileURLToPath(new URL(".", import.meta.url));
-const versionsDir = join(rootDir, "versions");
-const latestVersion = readdirSync(versionsDir)
-  .filter((name) => name.endsWith(".html"))
-  .sort()
-  .at(-1);
-
-if (!latestVersion) {
-  console.error("No versioned HTML snapshot found.");
-  process.exit(1);
-}
+const source = readFrontendSource();
+const html = readIndexHtml();
 
 const requiredMarkers = [
-  { label: "sortable header", needle: 'data-s="epsYoY"' },
-  { label: "YoY calculation", needle: "epsYoY=(c-p)/Math.abs(p)*100" },
-  { label: "table cell", needle: "pct(o.epsYoY)" },
+  { label: "sortable header", ok: html.includes('data-s="epsYoY"') },
+  {
+    label: "YoY calculation",
+    ok: /nextRow\.epsYoY = \(\(current - previous\) \/ Math\.abs\(previous\)\) \* 100;/.test(source),
+  },
+  { label: "table cell", ok: source.includes("pct(row.epsYoY)") },
 ];
 
-const targets = [
-  join(rootDir, "index.html"),
-  join(versionsDir, latestVersion),
-];
+const missing = requiredMarkers.filter((marker) => !marker.ok);
 
-let failed = false;
-
-for (const target of targets) {
-  const html = readFileSync(target, "utf8");
-  const missing = requiredMarkers.filter(({ needle }) => !html.includes(needle));
-  if (missing.length > 0) {
-    failed = true;
-    console.error(target);
-    for (const marker of missing) {
-      console.error(`  missing: ${marker.label}`);
-    }
+if (missing.length > 0) {
+  console.error("EPS YoY markers missing:");
+  for (const marker of missing) {
+    console.error(`- ${marker.label}`);
   }
-}
-
-if (failed) {
   process.exit(1);
 }
 
-console.log(`EPS YoY column verified in index.html and ${latestVersion}.`);
+console.log("EPS YoY column verified.");

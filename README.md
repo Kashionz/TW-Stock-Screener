@@ -20,10 +20,11 @@ The UI is built as a static HTML app, while the latest dataset is served through
 
 ## Data Pipeline
 
-- `index.html` contains the client UI and a bundled seed snapshot for offline or file-based viewing.
+- `index.html` contains the client UI shell and loads `assets/app/seed-snapshot.js` for offline or file-based viewing.
 - `api/snapshot.js` serves the best available snapshot with `no-store` caching.
 - `api/refresh.js` rebuilds the dataset from TWSE, TPEx, and MOPS sources, then writes the result to Vercel Blob storage.
 - `lib/snapshot-store.js` loads from Vercel Blob first and falls back to `data/latest-snapshot.json` if Blob storage is unavailable.
+- `data/latest-snapshot.json` and `assets/app/seed-snapshot.js` are kept in sync for local refresh and static-file fallback.
 - `vercel.json` defines the serverless function limits and the scheduled refresh job.
 
 ## Local Development
@@ -44,6 +45,14 @@ npm install
 ```bash
 npm run refresh:local
 ```
+
+### Sync the bundled file-mode snapshot only
+
+```bash
+npm run sync:seed
+```
+
+Use this when `data/latest-snapshot.json` has already been updated and you only want to regenerate `assets/app/seed-snapshot.js` for `file://` fallback verification.
 
 ### Daily Node workflow
 
@@ -74,7 +83,7 @@ Because `npm run dev:vercel` shells out to the Vercel CLI, installing and authen
 
 ### Static file fallback
 
-You can still open `index.html` directly in a browser. In file mode, the page works with the bundled snapshot embedded in the HTML, but there is no live `/api/snapshot` or `/api/refresh` behavior.
+You can still open `index.html` directly in a browser. In file mode, the page works with the bundled snapshot loaded from `assets/app/seed-snapshot.js`, but there is no live `/api/snapshot` or `/api/refresh` behavior.
 
 ## Environment Variables
 
@@ -102,5 +111,9 @@ Use `npm run dev` for the daily Node-based smoke test, then `npm run dev:vercel`
 ## Deployment Notes
 
 - The project is configured for Vercel.
+- Deployments are triggered from GitHub Actions instead of Vercel's built-in Git integration.
+- Add these repository secrets before enabling the workflow: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`.
+- Pushes to non-`main` branches create Vercel preview deployments; pushes to `main` create the production deployment.
+- `vercel.json` disables Vercel's native Git auto-deploy so the GitHub workflow remains the single deployment path.
 - Scheduled refresh is defined in `vercel.json`.
 - Historical HTML snapshots under `versions/` are kept in the repository, but excluded from Vercel deployment via `.vercelignore`.

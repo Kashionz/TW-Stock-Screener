@@ -1,21 +1,22 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { readFrontendSource, readIndexHtml } from "./check-frontend-source.mjs";
 
-const rootDir = fileURLToPath(new URL(".", import.meta.url));
-const html = readFileSync(join(rootDir, "index.html"), "utf8");
+const html = readIndexHtml();
+const source = readFrontendSource();
 
 const requiredMarkers = [
-  { label: "pagination container", needle: 'id="pager"' },
-  { label: "page state", needle: "sortDir=-1,page=1" },
-  { label: "page size", needle: "const PAGE_SIZE=50" },
-  { label: "paged slice", needle: "r.slice(start,start+PAGE_SIZE)" },
-  { label: "previous button", needle: 'data-page="prev"' },
-  { label: "next button", needle: 'data-page="next"' },
-  { label: "filter reset", needle: "page=1;render()" },
+  { label: "pagination container", ok: html.includes('id="pager"') },
+  { label: "page state", ok: source.includes("page: 1") },
+  { label: "page size", ok: source.includes("export const PAGE_SIZE = 50") },
+  { label: "paged slice", ok: source.includes(".slice(start, start + PAGE_SIZE)") },
+  { label: "previous button", ok: source.includes('data-page="prev"') },
+  { label: "next button", ok: source.includes('data-page="next"') },
+  {
+    label: "filter reset",
+    ok: /function rerenderFromFirstPage\(\)\s*{\s*state\.page = 1;\s*ui\.render\(\);\s*}/.test(source),
+  },
 ];
 
-const missing = requiredMarkers.filter(({ needle }) => !html.includes(needle));
+const missing = requiredMarkers.filter((marker) => !marker.ok);
 
 if (missing.length > 0) {
   console.error("Pagination markers missing:");

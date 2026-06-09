@@ -52,6 +52,7 @@ test("refreshSnapshot writes local snapshots in local mode", async () => {
   assert.equal(result.blobPath, null);
   assert.equal(result.blobUrl, null);
   assert.equal(result.localPath, "/tmp/latest-snapshot.json");
+  assert.equal(result.seedPath, null);
   assert.deepEqual(result.top5, expectedTop5());
 });
 
@@ -82,6 +83,7 @@ test("refreshSnapshot writes blob snapshots in blob mode", async () => {
   assert.equal(result.blobPath, "custom/latest.json");
   assert.equal(result.blobUrl, "https://blob.example/latest.json");
   assert.equal(result.localPath, null);
+  assert.equal(result.seedPath, null);
   assert.deepEqual(result.top5, expectedTop5());
 });
 

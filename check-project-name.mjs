@@ -1,8 +1,6 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { readIndexHtml } from "./check-frontend-source.mjs";
 
-const rootDir = "/Users/kashionz/Claude/Artifacts/twse-earnings-screener";
-const html = readFileSync(join(rootDir, "index.html"), "utf8");
+const html = readIndexHtml();
 
 const expectedTitle = "<title>台股篩選工具</title>";
 const expectedHeading = "<h1>台股篩選工具</h1>";

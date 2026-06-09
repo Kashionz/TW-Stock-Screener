@@ -30,10 +30,14 @@ test("startDevServer serves static UI, snapshot, and authorized refresh", async 
   const { startDevServer } = await import("../scripts/dev-server.mjs");
   const rootDir = await mkdtemp(join(tmpdir(), "twse-dev-"));
   const dataDir = join(rootDir, "data");
+  const assetsDir = join(rootDir, "assets", "app");
   const snapshotPath = join(dataDir, "latest-snapshot.json");
+  const seedSnapshotPath = join(assetsDir, "seed-snapshot.js");
 
   await mkdir(dataDir, { recursive: true });
+  await mkdir(assetsDir, { recursive: true });
   await writeFile(snapshotPath, JSON.stringify(createSnapshot("11504")));
+  await writeFile(seedSnapshotPath, "window.__TWSE_INITIAL_SNAPSHOT__={};\n");
   await writeFile(join(rootDir, "index.html"), "<!doctype html><title>TW</title><h1>TW</h1>");
   await writeFile(join(rootDir, "thumbnail.png"), "png");
 
@@ -81,6 +85,10 @@ test("startDevServer serves static UI, snapshot, and authorized refresh", async 
 
     const writtenSnapshot = JSON.parse(await readFile(snapshotPath, "utf8"));
     assert.equal(writtenSnapshot.meta.revPeriodROC, "11505");
+
+    const seedSnapshot = await readFile(seedSnapshotPath, "utf8");
+    assert.match(seedSnapshot, /window\.__TWSE_INITIAL_SNAPSHOT__=/u);
+    assert.match(seedSnapshot, /11505/u);
   } finally {
     await server.close();
   }

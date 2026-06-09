@@ -1,4 +1,4 @@
-import { readFile, realpath, stat, writeFile } from "node:fs/promises";
+import { readFile, realpath, stat } from "node:fs/promises";
 import { createServer } from "node:http";
 import { dirname, extname, join, normalize, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -10,6 +10,7 @@ import {
 import { refreshSnapshot } from "../lib/refresh-service.js";
 import { getRuntimeConfig } from "../lib/runtime-config.js";
 import { loadSnapshot } from "../lib/snapshot-service.js";
+import { writeLocalSnapshot } from "../lib/snapshot-store.js";
 
 export const ROOT_DIR = dirname(dirname(fileURLToPath(import.meta.url)));
 const PUBLIC_STATIC_FILES = new Set([
@@ -137,6 +138,7 @@ async function handleRefreshRequest(
   res,
   config,
   dataSnapshotPath,
+  seedSnapshotPath,
   buildSnapshotImpl,
 ) {
   assertAuthorizedBearerToken(req.headers.authorization || "", config);
@@ -144,10 +146,11 @@ async function handleRefreshRequest(
   const result = await refreshSnapshot({
     target: "local",
     buildSnapshotImpl,
-    writeLocalSnapshotImpl: async (snapshot) => {
-      await writeFile(dataSnapshotPath, JSON.stringify(snapshot));
-      return { path: dataSnapshotPath };
-    },
+    writeLocalSnapshotImpl: async (snapshot) =>
+      writeLocalSnapshot(snapshot, {
+        snapshotPath: dataSnapshotPath,
+        seedSnapshotPath,
+      }),
   });
 
   sendJson(res, 200, result, {
@@ -178,6 +181,7 @@ export async function startDevServer({
   const config = getRuntimeConfig(env);
   const realRootDir = await realpath(rootDir);
   const dataSnapshotPath = join(rootDir, "data", "latest-snapshot.json");
+  const seedSnapshotPath = join(rootDir, "assets", "app", "seed-snapshot.js");
 
   const server = createServer(async (req, res) => {
     const requestUrl = new URL(req.url || "/", "http://127.0.0.1");
@@ -200,6 +204,7 @@ export async function startDevServer({
           res,
           config,
           dataSnapshotPath,
+          seedSnapshotPath,
           buildSnapshotImpl,
         );
         return;
