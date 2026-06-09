@@ -111,5 +111,9 @@ Use `npm run dev` for the daily Node-based smoke test, then `npm run dev:vercel`
 ## Deployment Notes
 
 - The project is configured for Vercel.
+- Deployments are triggered from GitHub Actions instead of Vercel's built-in Git integration.
+- Add these repository secrets before enabling the workflow: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`.
+- Pushes to non-`main` branches create Vercel preview deployments; pushes to `main` create the production deployment.
+- `vercel.json` disables Vercel's native Git auto-deploy so the GitHub workflow remains the single deployment path.
 - Scheduled refresh is defined in `vercel.json`.
 - Historical HTML snapshots under `versions/` are kept in the repository, but excluded from Vercel deployment via `.vercelignore`.
