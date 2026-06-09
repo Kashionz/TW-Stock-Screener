@@ -75,7 +75,7 @@ textarea{min-height:64px;resize:vertical}
 .close{position:absolute;top:14px;right:16px;cursor:pointer;font-size:20px;color:var(--sub)}
 .dractions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
 .drbtn{padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:inherit;font-size:12.5px;cursor:pointer}
-.drbtn.pri{background:var(--ink);border-color:var(--ink);color:#fff}
+.drbtn.ghost{background:transparent;border-color:var(--line);color:var(--sub);font-size:12px;padding:5px 10px}
 .drbtn:disabled{cursor:default;opacity:.55}
 .refreshstatus{min-height:18px;margin-bottom:4px}
 .refreshstatus.ok{color:var(--good)}
@@ -116,7 +116,7 @@ textarea{min-height:64px;resize:vertical}
 <div class="dr" id="dr">
  <span class="close" id="close">✕</span>
  <h2 id="dName"></h2><div class="muted" id="dMeta"></div>
- <div class="dractions"><button class="drbtn pri" id="dRefresh">更新個股資訊</button><button class="drbtn" id="dRefreshKey">設定更新金鑰</button></div>
+ <div class="dractions"><button class="drbtn ghost" id="dRefresh">更新個股資訊</button></div>
  <div class="muted refreshstatus" id="dRefreshStatus"></div>
  <div class="drstats" id="dStats"></div>
  <div class="sec">近 12 個月營收（億元）</div>

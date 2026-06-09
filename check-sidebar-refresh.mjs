@@ -5,7 +5,6 @@ const source = readFrontendSource();
 
 const requiredMarkers = [
   { label: "drawer refresh button", ok: html.includes('id="dRefresh"') },
-  { label: "drawer refresh key button", ok: html.includes('id="dRefreshKey"') },
   { label: "drawer refresh status", ok: html.includes('id="dRefreshStatus"') },
   { label: "refresh helper", ok: source.includes("async function refreshCurrentStock()") },
   {

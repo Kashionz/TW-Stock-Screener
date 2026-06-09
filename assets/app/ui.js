@@ -80,7 +80,6 @@ export function collectDom(documentRoot = document) {
     dName: documentRoot.getElementById("dName"),
     dMeta: documentRoot.getElementById("dMeta"),
     dRefresh: documentRoot.getElementById("dRefresh"),
-    dRefreshKey: documentRoot.getElementById("dRefreshKey"),
     dRefreshStatus: documentRoot.getElementById("dRefreshStatus"),
     dStats: documentRoot.getElementById("dStats"),
     dChart: documentRoot.getElementById("dChart"),
@@ -144,8 +143,6 @@ export function createAppUi({ state, dom, runtime }) {
 
     dom.dRefresh.disabled = apiUnavailable || state.refreshBusy;
     dom.dRefresh.textContent = state.refreshBusy ? "更新中…" : "更新個股資訊";
-    dom.dRefreshKey.disabled = apiUnavailable || state.refreshBusy;
-    dom.dRefreshKey.textContent = state.refreshKey ? "更新金鑰" : "設定更新金鑰";
   }
 
   function renderIndustryOptions() {
@@ -428,10 +425,10 @@ export function createAppUi({ state, dom, runtime }) {
     dom.dMeta.textContent = row.ind + (row.note ? ` ｜ 備註:${row.note}` : "");
     setRefreshStatus(
       runtime && !runtime.hasLiveApi
-        ? "目前是靜態檔模式；若要測試設定更新金鑰與更新個股資訊，請改用 npm run dev 或 npm run dev:vercel。"
+        ? "目前是靜態檔模式；若要測試更新個股資訊，請改用 npm run dev 或 npm run dev:vercel。"
         : state.refreshKey
           ? "可手動抓取最新快照，並重新載入這檔資料。"
-          : "可先重新載入目前快照；若要重抓交易所最新資料，請先設定更新金鑰。",
+          : "點「更新個股資訊」可重新載入最新快照。",
     );
     updateRefreshControls();
 

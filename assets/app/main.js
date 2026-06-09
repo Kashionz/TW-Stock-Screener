@@ -118,12 +118,6 @@ dom.dRefresh.addEventListener("click", () => {
   refreshFlow.refreshCurrentStock();
 });
 
-dom.dRefreshKey.addEventListener("click", () => {
-  if (!state.refreshBusy) {
-    refreshFlow.promptRefreshKey();
-  }
-});
-
 dom.dPhrases.addEventListener("change", (event) => {
   const label = event.target.closest(".ph");
   if (!label || !state.currentCode) return;
