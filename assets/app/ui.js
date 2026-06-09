@@ -14,6 +14,7 @@ import {
   epsBarColor,
   escapeHtml,
   fmt,
+  formatChange,
   pct,
   signedFmt,
   snapshotHeader,
@@ -246,7 +247,7 @@ export function createAppUi({ state, dom, runtime }) {
           `<td class="l hideM"><span class="muted">${escapeHtml(row.ind)}</span></td>` +
           `<td>${pct(row.yoy)}</td><td class="hideM">${pct(row.ytdYoy)}</td><td class="hideM">${signedFmt(row.gm, 1)}</td>` +
           `<td>${signedFmt(row.eps, 2)}</td><td>${pct(row.epsYoY)}</td><td>${fmt(row.pe, 1)}</td><td class="hideM">${fmt(row.pb, 2)}</td>` +
-          `<td>${fmt(row.price, 2)}</td><td class="hideM">${pct(row.chg)}</td>` +
+          `<td>${fmt(row.price, 2)}</td><td class="hideM">${formatChange(row)}</td>` +
           `<td><span class="badge ${phraseBadgeClass}">${phraseCount}/7</span></td><td>${rating}</td>` +
           "</tr>"
         );
