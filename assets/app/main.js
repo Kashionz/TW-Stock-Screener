@@ -17,6 +17,7 @@ if (!initialSnapshot?.meta || !Array.isArray(initialSnapshot.rows)) {
 }
 
 const state = createAppState(initialSnapshot);
+state.snapshotEtag = window.__TWSE_INITIAL_SNAPSHOT_ETAG__ || null;
 const runtime = createRuntimeConfig();
 const dom = collectDom();
 const ui = createAppUi({ state, dom, runtime });

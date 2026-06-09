@@ -53,6 +53,10 @@ test("startDevServer serves static UI, snapshot, and authorized refresh", async 
   try {
     const homeResponse = await fetch(server.url);
     assert.equal(homeResponse.status, 200);
+    const csp = homeResponse.headers.get("content-security-policy");
+    assert.match(csp, /script-src 'self' https:\/\/cdn\.jsdelivr\.net/u);
+    assert.match(csp, /frame-ancestors 'none'/u);
+    assert.equal(homeResponse.headers.get("x-content-type-options"), "nosniff");
     assert.match(await homeResponse.text(), /TW/u);
 
     const imageResponse = await fetch(`${server.url}/thumbnail.png`);
@@ -89,6 +93,41 @@ test("startDevServer serves static UI, snapshot, and authorized refresh", async 
     const seedSnapshot = await readFile(seedSnapshotPath, "utf8");
     assert.match(seedSnapshot, /window\.__TWSE_INITIAL_SNAPSHOT__=/u);
     assert.match(seedSnapshot, /11505/u);
+  } finally {
+    await server.close();
+  }
+});
+
+test("startDevServer answers conditional snapshot requests with 304", async () => {
+  const { startDevServer } = await import("../scripts/dev-server.mjs");
+  const rootDir = await mkdtemp(join(tmpdir(), "twse-dev-"));
+  const dataDir = join(rootDir, "data");
+
+  await mkdir(dataDir, { recursive: true });
+  await writeFile(join(dataDir, "latest-snapshot.json"), JSON.stringify(createSnapshot("11504")));
+  await writeFile(join(rootDir, "index.html"), "<!doctype html><title>TW</title><h1>TW</h1>");
+
+  const server = await startDevServer({
+    rootDir,
+    env: {
+      PORT: "0",
+      REFRESH_SECRET: "local-secret",
+    },
+    buildSnapshotImpl: async () => createSnapshot("11505"),
+  });
+
+  try {
+    const first = await fetch(`${server.url}/api/snapshot`);
+    assert.equal(first.status, 200);
+    const etag = first.headers.get("etag");
+    assert.match(etag, /^"s[0-9a-z]+"$/u);
+
+    const conditional = await fetch(`${server.url}/api/snapshot`, {
+      headers: { "if-none-match": etag },
+    });
+    assert.equal(conditional.status, 304);
+    assert.equal(conditional.headers.get("etag"), etag);
+    assert.equal(await conditional.text(), "");
   } finally {
     await server.close();
   }

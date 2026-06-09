@@ -1,3 +1,12 @@
+export function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export function quarterLabel(iq) {
   return iq && iq.length >= 2 ? `${Number(iq[0]) + 1911} Q${iq[1]}` : "";
 }

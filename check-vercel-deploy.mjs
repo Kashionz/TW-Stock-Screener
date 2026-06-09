@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { readFrontendSource } from "./check-frontend-source.mjs";
+import { CONTENT_SECURITY_POLICY, SECURITY_HEADERS } from "./lib/security-headers.js";
 
 const rootDir = fileURLToPath(new URL(".", import.meta.url));
 
@@ -29,6 +30,23 @@ expect(
 expect(
   vercelJson.git?.deploymentEnabled === false,
   "vercel.json should disable built-in Git deployments",
+);
+
+const globalHeaderRule = (vercelJson.headers || []).find(
+  (rule) => rule.source === "/(.*)",
+);
+expect(Boolean(globalHeaderRule), "vercel.json is missing the global security headers rule");
+for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+  const header = (globalHeaderRule.headers || []).find((entry) => entry.key === key);
+  expect(Boolean(header), `vercel.json is missing the ${key} header`);
+  expect(
+    header.value === value,
+    `vercel.json ${key} must match lib/security-headers.js`,
+  );
+}
+expect(
+  CONTENT_SECURITY_POLICY.includes("https://cdn.jsdelivr.net"),
+  "CSP must allow the Chart.js CDN origin",
 );
 expect(
   frontendSource.includes("/api/snapshot"),
