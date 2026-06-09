@@ -11,7 +11,7 @@
     "dev:vercel": "vercel dev",
     "test": "node --test tests/*.test.mjs",
     "check:deploy": "node ./check-vercel-deploy.mjs",
-    "check:ui": "node ./check-color-display.mjs && node ./check-drawer-eps-fallback.mjs && node ./check-eps-yoy-column.mjs && node ./check-link-field-removed.mjs && node ./check-pagination.mjs && node ./check-project-name.mjs && node ./check-sidebar-refresh.mjs",
+    "check:ui": "node ./check-color-display.mjs && node ./check-drawer-eps-fallback.mjs && node ./check-eps-yoy-column.mjs && node ./check-floating-panel-layout.mjs && node ./check-link-field-removed.mjs && node ./check-pagination.mjs && node ./check-project-name.mjs && node ./check-sidebar-refresh.mjs",
     "refresh:local": "node ./scripts/refresh-local.mjs",
     "sync:seed": "node ./scripts/sync-seed-snapshot.mjs"
   },
