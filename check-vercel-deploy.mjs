@@ -18,7 +18,7 @@ const vercelWorkflow = readFileSync(join(rootDir, ".github", "workflows", "verce
 const frontendSource = readFrontendSource();
 
 expect(packageJson.dependencies?.["@vercel/blob"] === "2.4.0", "missing @vercel/blob dependency");
-expect(packageJson.engines?.node === "20.x", "unexpected Node engine range");
+expect(packageJson.engines?.node === "24.x", "unexpected Node engine range");
 expect(packageJson.scripts?.dev === "node ./scripts/dev-server.mjs", "missing npm dev script");
 expect(packageJson.scripts?.["dev:vercel"] === "vercel dev", "missing npm dev:vercel script");
 expect(packageJson.scripts?.test === "node --test tests/*.test.mjs", "unexpected npm test script");

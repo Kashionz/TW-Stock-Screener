@@ -31,7 +31,7 @@ The UI is built as a static HTML app, while the latest dataset is served through
 
 ### Prerequisites
 
-- Node.js 20.x
+- Node.js 24.x
 - Vercel CLI is required before `npm run dev:vercel` can run successfully.
 
 ### Install
