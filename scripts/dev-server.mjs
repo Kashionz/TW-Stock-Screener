@@ -1,5 +1,4 @@
-import { existsSync } from "node:fs";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, realpath, stat, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { dirname, extname, join, normalize, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -44,14 +43,51 @@ function resolveStaticFile(rootDir, pathname) {
   const resolvedRoot = resolve(rootDir);
   const resolvedPath = resolve(rootDir, normalizedPath);
 
-  if (
-    resolvedPath !== resolvedRoot &&
-    !resolvedPath.startsWith(`${resolvedRoot}${sep}`)
-  ) {
+  if (!isPathInside(resolvedRoot, resolvedPath)) {
     return null;
   }
 
   return resolvedPath;
+}
+
+function isPathInside(parentPath, childPath) {
+  return (
+    childPath === parentPath ||
+    childPath.startsWith(`${parentPath}${sep}`)
+  );
+}
+
+async function resolveServableStaticFile(rootDir, realRootDir, pathname) {
+  const filePath = resolveStaticFile(rootDir, pathname);
+  if (!filePath) {
+    return null;
+  }
+
+  let realFilePath;
+  try {
+    realFilePath = await realpath(filePath);
+  } catch (error) {
+    if (
+      error &&
+      typeof error === "object" &&
+      ["ENOENT", "ENOTDIR"].includes(error.code)
+    ) {
+      return null;
+    }
+
+    throw error;
+  }
+
+  if (!isPathInside(realRootDir, realFilePath)) {
+    return null;
+  }
+
+  const fileStats = await stat(realFilePath);
+  if (!fileStats.isFile()) {
+    return null;
+  }
+
+  return realFilePath;
 }
 
 async function handleSnapshotRequest(res, dataSnapshotPath) {
@@ -88,9 +124,9 @@ async function handleRefreshRequest(
   });
 }
 
-async function handleStaticRequest(res, rootDir, pathname) {
-  const filePath = resolveStaticFile(rootDir, pathname);
-  if (!filePath || !existsSync(filePath)) {
+async function handleStaticRequest(res, rootDir, realRootDir, pathname) {
+  const filePath = await resolveServableStaticFile(rootDir, realRootDir, pathname);
+  if (!filePath) {
     res.writeHead(404);
     res.end("Not found");
     return;
@@ -109,6 +145,7 @@ export async function startDevServer({
   buildSnapshotImpl,
 } = {}) {
   const config = getRuntimeConfig(env);
+  const realRootDir = await realpath(rootDir);
   const dataSnapshotPath = join(rootDir, "data", "latest-snapshot.json");
 
   const server = createServer(async (req, res) => {
@@ -137,7 +174,7 @@ export async function startDevServer({
         return;
       }
 
-      await handleStaticRequest(res, rootDir, requestUrl.pathname);
+      await handleStaticRequest(res, rootDir, realRootDir, requestUrl.pathname);
     } catch (error) {
       if (error instanceof UnauthorizedError) {
         sendJson(res, 401, {
