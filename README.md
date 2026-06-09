@@ -31,6 +31,7 @@ The UI is built as a static HTML app, while the latest dataset is served through
 ### Prerequisites
 
 - Node.js 20.x
+- Vercel CLI is required before `npm run dev:vercel` can run successfully.
 
 ### Install
 
@@ -44,11 +45,35 @@ npm install
 npm run refresh:local
 ```
 
-### View the app locally
+### Daily Node workflow
 
-You can open `index.html` directly in a browser. In file mode, the page still works with the bundled snapshot embedded in the HTML.
+Set `REFRESH_SECRET` before testing `/api/refresh`, because the local refresh endpoint expects a bearer token that matches `REFRESH_SECRET` or `CRON_SECRET`.
 
-If you want live `/api/snapshot` and `/api/refresh` behavior, run it through a Vercel deployment or a compatible local serverless workflow.
+```bash
+REFRESH_SECRET=your-secret npm run dev
+```
+
+`npm run dev` starts the pure Node.js local server at `http://127.0.0.1:3000` by default. This workflow serves:
+
+- `/` for the static app shell
+- `/api/snapshot` for the latest local snapshot payload
+- `/api/refresh` for rebuilding data and writing the refreshed snapshot back to `data/latest-snapshot.json`
+
+This is the daily local development path when you want to work against the app and API routes without going through the Vercel runtime.
+
+### Vercel compatibility verification
+
+```bash
+npm run dev:vercel
+```
+
+`npm run dev:vercel` runs `vercel dev` and is the formal compatibility check for the deployed runtime. It should be used to verify that the local behavior still matches the intended Vercel execution path.
+
+Because `npm run dev:vercel` shells out to the Vercel CLI, installing and authenticating `vercel` is a prerequisite for this verification mode.
+
+### Static file fallback
+
+You can still open `index.html` directly in a browser. In file mode, the page works with the bundled snapshot embedded in the HTML, but there is no live `/api/snapshot` or `/api/refresh` behavior.
 
 ## Environment Variables
 
@@ -60,11 +85,12 @@ If you want live `/api/snapshot` and `/api/refresh` behavior, run it through a V
 ## Validation
 
 ```bash
+npm test
 npm run check:ui
 npm run check:deploy
 ```
 
-These checks cover key UI markers, deployment assumptions, and the current project naming.
+Use `npm run dev` for the daily Node-based smoke test, then `npm run dev:vercel` when the Vercel CLI is available and you need the deployment-compatible verification path.
 
 ## Data Sources
 
