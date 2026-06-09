@@ -12,6 +12,7 @@ import {
 import {
   displayQuarterEps,
   epsBarColor,
+  escapeHtml,
   fmt,
   pct,
   signedFmt,
@@ -155,7 +156,7 @@ export function createAppUi({ state, dom, runtime }) {
 
     dom.ind.innerHTML =
       '<option value="">全部產業</option>' +
-      industries.map((industry) => `<option>${industry}</option>`).join("");
+      industries.map((industry) => `<option>${escapeHtml(industry)}</option>`).join("");
 
     if (previousValue && industries.includes(previousValue)) {
       dom.ind.value = previousValue;
@@ -244,8 +245,8 @@ export function createAppUi({ state, dom, runtime }) {
         return (
           `<tr class="row${focus ? " focus" : ""}" data-c="${code}">` +
           `<td><span class="star${getRecordState(state, code).star ? " on" : ""}" data-star="${code}">★</span></td>` +
-          `<td class="l"><span class="name">${row.name}</span> <span class="code">${code}</span>${marketBadge}</td>` +
-          `<td class="l hideM"><span class="muted">${row.ind}</span></td>` +
+          `<td class="l"><span class="name">${escapeHtml(row.name)}</span> <span class="code">${code}</span>${marketBadge}</td>` +
+          `<td class="l hideM"><span class="muted">${escapeHtml(row.ind)}</span></td>` +
           `<td>${pct(row.yoy)}</td><td class="hideM">${pct(row.ytdYoy)}</td><td class="hideM">${signedFmt(row.gm, 1)}</td>` +
           `<td>${signedFmt(row.eps, 2)}</td><td>${pct(row.epsYoY)}</td><td>${fmt(row.pe, 1)}</td><td class="hideM">${fmt(row.pb, 2)}</td>` +
           `<td>${fmt(row.price, 2)}</td><td class="hideM">${pct(row.chg)}</td>` +
@@ -422,7 +423,7 @@ export function createAppUi({ state, dom, runtime }) {
     const rocYear = Number(state.snapshot.meta.incQuarter?.[0] || "115") || 115;
 
     dom.dName.innerHTML =
-      `${row.name} <span class="code">${code}</span> <span class="mk ${row.mkt === "上櫃" ? 'mkO">櫃' : 'mkS">市'}</span> ` +
+      `${escapeHtml(row.name)} <span class="code">${code}</span> <span class="mk ${row.mkt === "上櫃" ? 'mkO">櫃' : 'mkS">市'}</span> ` +
       (entry.star ? '<span class="star on">★</span>' : "");
     dom.dMeta.textContent = row.ind + (row.note ? ` ｜ 備註:${row.note}` : "");
     setRefreshStatus(
