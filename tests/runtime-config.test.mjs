@@ -51,3 +51,9 @@ test("getRuntimeConfig 對非純整數 PORT 會 fallback 到預設值", async ()
     );
   }
 });
+
+test("getRuntimeConfig 接受 PORT=0 作為合法值", async () => {
+  const { getRuntimeConfig } = await import("../lib/runtime-config.js");
+
+  assert.equal(getRuntimeConfig({ PORT: "0" }).port, 0);
+});
