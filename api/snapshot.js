@@ -1,8 +1,8 @@
-import { loadBestSnapshot } from "../lib/snapshot-store.js";
+import { loadSnapshot } from "../lib/snapshot-service.js";
 
 export async function GET() {
   try {
-    const snapshot = await loadBestSnapshot();
+    const snapshot = await loadSnapshot({ source: "best" });
     return Response.json(snapshot, {
       headers: {
         "Cache-Control": "no-store",
