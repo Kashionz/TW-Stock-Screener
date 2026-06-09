@@ -812,7 +812,7 @@ tr.focus.current td{background:#e8f0ff}
 
 .ov.on{
   opacity:1;
-  pointer-events:auto;
+  pointer-events:none;
 }
 
 .dr{
@@ -877,7 +877,7 @@ tr.focus.current td{background:#e8f0ff}
 
 .drawer-content{
   display:none;
-  grid-template-rows:auto auto auto minmax(0,1fr);
+  grid-template-rows:auto auto auto auto minmax(0,1fr);
   min-height:0;
   height:100%;
 }
@@ -996,12 +996,12 @@ tr.focus.current td{background:#e8f0ff}
 }
 
 .drawer-panel{
-  display:grid;
+  display:none;
   gap:22px;
 }
 
-.drawer-panel + .drawer-panel{
-  margin-top:22px;
+.drawer-panel.on{
+  display:grid;
 }
 
 .sec{
@@ -1207,6 +1207,10 @@ textarea{
     display:grid;
     transform:translateX(0);
     opacity:1;
+    pointer-events:auto;
+  }
+
+  .ov.on{
     pointer-events:auto;
   }
 }
@@ -1550,14 +1554,14 @@ textarea{
           <div class="muted refreshstatus" id="dRefreshStatus"></div>
 
           <nav class="drawer-tabs" id="dTabs" aria-label="個股研究段落" role="tablist">
-            <button type="button" class="drtab on" data-section="overview" aria-selected="true" role="tab">總覽</button>
-            <button type="button" class="drtab" data-section="charts" aria-selected="false" role="tab">圖表</button>
-            <button type="button" class="drtab" data-section="financials" aria-selected="false" role="tab">財報</button>
-            <button type="button" class="drtab" data-section="notes" aria-selected="false" role="tab">筆記</button>
+            <button type="button" class="drtab on" id="tab-overview" data-section="overview" aria-selected="true" aria-controls="panel-overview" tabindex="0" role="tab">總覽</button>
+            <button type="button" class="drtab" id="tab-charts" data-section="charts" aria-selected="false" aria-controls="panel-charts" tabindex="-1" role="tab">圖表</button>
+            <button type="button" class="drtab" id="tab-financials" data-section="financials" aria-selected="false" aria-controls="panel-financials" tabindex="-1" role="tab">財報</button>
+            <button type="button" class="drtab" id="tab-notes" data-section="notes" aria-selected="false" aria-controls="panel-notes" tabindex="-1" role="tab">筆記</button>
           </nav>
 
           <div class="drawer-scroll">
-            <section class="drawer-panel" data-panel="overview" role="tabpanel">
+            <section class="drawer-panel on" id="panel-overview" data-panel="overview" aria-labelledby="tab-overview" role="tabpanel">
               <div class="drstats drstats-quick" id="dStats"></div>
               <section class="drawer-section">
                 <div class="sec">快速摘要</div>
@@ -1565,7 +1569,7 @@ textarea{
               </section>
             </section>
 
-            <section class="drawer-panel" data-panel="charts" role="tabpanel">
+            <section class="drawer-panel" id="panel-charts" data-panel="charts" aria-labelledby="tab-charts" role="tabpanel" hidden>
               <section class="drawer-section">
                 <div class="sec">近 12 個月營收（億元）</div>
                 <div class="chartbox"><canvas id="dChart"></canvas></div>
@@ -1577,7 +1581,7 @@ textarea{
               </section>
             </section>
 
-            <section class="drawer-panel" data-panel="financials" role="tabpanel">
+            <section class="drawer-panel" id="panel-financials" data-panel="financials" aria-labelledby="tab-financials" role="tabpanel" hidden>
               <section class="drawer-section">
                 <div class="sec" id="dFinTitle">季度損益表</div>
                 <div class="fintab-wrap">
@@ -1591,7 +1595,7 @@ textarea{
               </section>
             </section>
 
-            <section class="drawer-panel" data-panel="notes" role="tabpanel">
+            <section class="drawer-panel" id="panel-notes" data-panel="notes" aria-labelledby="tab-notes" role="tabpanel" hidden>
               <section class="drawer-section">
                 <div class="sec">備註 / 重點摘錄</div>
                 <textarea id="dNote" placeholder="例如：法說提到 HBM 供不應求，Q3 報價續漲。"></textarea>

@@ -1,5 +1,6 @@
 import {
   createAppState,
+  getFilteredRows,
   toggleStar,
   updateNote,
   updatePhrase,
@@ -28,10 +29,34 @@ function rerenderFromFirstPage() {
   ui.render();
 }
 
+function rerenderFromFirstPageAndSync() {
+  rerenderFromFirstPage();
+  syncDesktopSelection();
+}
+
+function syncDesktopSelection() {
+  if (!window.matchMedia("(min-width: 1181px)").matches) {
+    return;
+  }
+
+  const filteredRows = getFilteredRows(state, ui.readFilters());
+
+  if (!filteredRows.length) {
+    if (state.currentCode) {
+      ui.closeDrawer();
+    }
+    return;
+  }
+
+  if (!state.currentCode || !filteredRows.some((row) => row.code === state.currentCode)) {
+    ui.openDrawer(filteredRows[0].code);
+  }
+}
+
 for (const id of FILTER_IDS) {
   const element = dom[id];
-  element.addEventListener("input", rerenderFromFirstPage);
-  element.addEventListener("change", rerenderFromFirstPage);
+  element.addEventListener("input", rerenderFromFirstPageAndSync);
+  element.addEventListener("change", rerenderFromFirstPageAndSync);
 }
 
 for (const button of dom.viewButtons) {
@@ -44,7 +69,7 @@ for (const button of dom.viewButtons) {
     if (state.view !== "all") {
       dom.minYoy.value = "";
     }
-    rerenderFromFirstPage();
+    rerenderFromFirstPageAndSync();
   });
 }
 
@@ -57,7 +82,7 @@ for (const header of dom.sortHeaders) {
       state.sortKey = key;
       state.sortDir = -1;
     }
-    rerenderFromFirstPage();
+    rerenderFromFirstPageAndSync();
   });
 }
 
@@ -100,6 +125,13 @@ dom.close.addEventListener("click", () => {
   ui.closeDrawer();
 });
 
+dom.dTabs.addEventListener("click", (event) => {
+  const button = event.target.closest(".drtab[data-section]");
+  if (!button || !state.currentCode) return;
+
+  ui.setDrawerSection(button.dataset.section);
+});
+
 dom.emS.addEventListener("click", () => {
   state.epsMode = "S";
   dom.emS.classList.add("on");
@@ -130,10 +162,16 @@ dom.dPhrases.addEventListener("change", (event) => {
 dom.dNote.addEventListener("input", (event) => {
   if (!state.currentCode) return;
   updateNote(state, state.currentCode, event.target.value);
+  ui.updateDrawerMeta(event.target.value);
 });
 
 ui.syncSnapshotMeta();
 ui.renderIndustryOptions();
 ui.updateRefreshControls();
 ui.render();
+syncDesktopSelection();
 refreshFlow.hydrateLatestSnapshot();
+
+window.addEventListener("resize", () => {
+  syncDesktopSelection();
+});
