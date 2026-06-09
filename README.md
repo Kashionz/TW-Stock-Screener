@@ -60,6 +60,7 @@ REFRESH_SECRET=your-secret npm run dev
 - `/api/refresh` for rebuilding data and writing the refreshed snapshot back to `data/latest-snapshot.json`
 
 This is the daily local development path when you want to work against the app and API routes without going through the Vercel runtime.
+`npm run dev` intentionally reads the local snapshot file directly; if you need the Blob-first "best snapshot" behavior, use `npm run dev:vercel`.
 
 ### Vercel compatibility verification
 
@@ -67,7 +68,7 @@ This is the daily local development path when you want to work against the app a
 npm run dev:vercel
 ```
 
-`npm run dev:vercel` runs `vercel dev` and is the formal compatibility check for the deployed runtime. It should be used to verify that the local behavior still matches the intended Vercel execution path.
+`npm run dev:vercel` runs `vercel dev` and is the formal compatibility check for the deployed runtime. It should be used to verify that the local behavior still matches the intended Vercel execution path, including the Blob-backed snapshot strategy.
 
 Because `npm run dev:vercel` shells out to the Vercel CLI, installing and authenticating `vercel` is a prerequisite for this verification mode.
 
