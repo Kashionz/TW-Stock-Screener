@@ -1,13 +1,12 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { readFrontendSource } from "./check-frontend-source.mjs";
 
-const rootDir = fileURLToPath(new URL(".", import.meta.url));
-const html = readFileSync(join(rootDir, "index.html"), "utf8");
+const source = readFrontendSource();
 
-const hasFallbackHelper = html.includes("function displayQuarterEps(o)");
-const usesFallbackInDrawer = html.includes("['EPS(季)',signedFmt(displayQuarterEps(o),2)]");
-const stillUsesRawQuarterEps = html.includes("['EPS(季)',fmt(o.eps,2)]") || html.includes("['EPS(季)',fmt(displayQuarterEps(o),2)]");
+const hasFallbackHelper = source.includes("export function displayQuarterEps(row)");
+const usesFallbackInDrawer = source.includes('["EPS(季)", signedFmt(displayQuarterEps(row), 2)]');
+const stillUsesRawQuarterEps =
+  source.includes('["EPS(季)", fmt(row.eps, 2)]') ||
+  source.includes('["EPS(季)", fmt(displayQuarterEps(row), 2)]');
 
 if (!hasFallbackHelper || !usesFallbackInDrawer || stillUsesRawQuarterEps) {
   console.error("Drawer EPS fallback not wired correctly.");

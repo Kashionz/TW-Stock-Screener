@@ -1,20 +1,24 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { readFrontendSource, readIndexHtml } from "./check-frontend-source.mjs";
 
-const rootDir = fileURLToPath(new URL(".", import.meta.url));
-const html = readFileSync(join(rootDir, "index.html"), "utf8");
+const html = readIndexHtml();
+const source = readFrontendSource();
 
 const requiredMarkers = [
-  { label: "drawer refresh button", needle: 'id="dRefresh"' },
-  { label: "drawer refresh key button", needle: 'id="dRefreshKey"' },
-  { label: "drawer refresh status", needle: 'id="dRefreshStatus"' },
-  { label: "refresh helper", needle: "async function refreshCurrentStock()" },
-  { label: "snapshot reload helper", needle: "async function reloadCurrentSnapshot(okMessage)" },
-  { label: "snapshot reopen flow", needle: "hydrateLatestSnapshot({reopenCode:code,resetPage:false})" },
+  { label: "drawer refresh button", ok: html.includes('id="dRefresh"') },
+  { label: "drawer refresh key button", ok: html.includes('id="dRefreshKey"') },
+  { label: "drawer refresh status", ok: html.includes('id="dRefreshStatus"') },
+  { label: "refresh helper", ok: source.includes("async function refreshCurrentStock()") },
+  {
+    label: "snapshot reload helper",
+    ok: source.includes("async function reloadCurrentSnapshot(okMessage)"),
+  },
+  {
+    label: "snapshot reopen flow",
+    ok: /hydrateLatestSnapshot\(\{\s*reopenCode,\s*resetPage: false,\s*}\)/.test(source),
+  },
 ];
 
-const missing = requiredMarkers.filter(({ needle }) => !html.includes(needle));
+const missing = requiredMarkers.filter((marker) => !marker.ok);
 
 if (missing.length > 0) {
   console.error("Sidebar refresh markers missing:");
