@@ -20,6 +20,13 @@ function createSnapshot() {
   };
 }
 
+function snapshotWithMetrics({ count, r12n, epsN }) {
+  return {
+    meta: { revPeriodROC: "11505", count, r12n, epsN },
+    rows: createSnapshot().rows,
+  };
+}
+
 function expectedTop5() {
   return [
     { code: "2330", name: "台積電", ind: "半導體業", yoy: 31 },
@@ -135,6 +142,99 @@ test("refreshSnapshot sets storedAt after a successful write", async (t) => {
   });
 
   assert.equal(result.storedAt, "after-write");
+});
+
+test("refreshSnapshot aborts and does not write when guarded metrics regress", async () => {
+  const { refreshSnapshot, RefreshRegressionError } = await import(
+    "../lib/refresh-service.js"
+  );
+  let wrote = false;
+
+  await assert.rejects(
+    () =>
+      refreshSnapshot({
+        target: "local",
+        minRetentionRatio: 0.7,
+        buildSnapshotImpl: async () =>
+          snapshotWithMetrics({ count: 1950, r12n: 100, epsN: 1900 }),
+        readCurrentSnapshotImpl: async () =>
+          snapshotWithMetrics({ count: 1954, r12n: 1830, epsN: 1951 }),
+        writeLocalSnapshotImpl: async () => {
+          wrote = true;
+          return { path: "/tmp/latest-snapshot.json" };
+        },
+      }),
+    (error) => {
+      assert.ok(error instanceof RefreshRegressionError);
+      assert.match(error.message, /r12n/);
+      return true;
+    },
+  );
+
+  assert.equal(wrote, false);
+});
+
+test("refreshSnapshot writes when guarded metrics stay within the retention ratio", async () => {
+  const { refreshSnapshot } = await import("../lib/refresh-service.js");
+  let wrote = false;
+
+  const result = await refreshSnapshot({
+    target: "local",
+    minRetentionRatio: 0.7,
+    buildSnapshotImpl: async () =>
+      snapshotWithMetrics({ count: 1950, r12n: 1800, epsN: 1940 }),
+    readCurrentSnapshotImpl: async () =>
+      snapshotWithMetrics({ count: 1954, r12n: 1830, epsN: 1951 }),
+    writeLocalSnapshotImpl: async () => {
+      wrote = true;
+      return { path: "/tmp/latest-snapshot.json" };
+    },
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(wrote, true);
+});
+
+test("refreshSnapshot skips the regression guard when there is no previous snapshot", async () => {
+  const { refreshSnapshot } = await import("../lib/refresh-service.js");
+  let wrote = false;
+
+  const result = await refreshSnapshot({
+    target: "local",
+    minRetentionRatio: 0.7,
+    buildSnapshotImpl: async () =>
+      snapshotWithMetrics({ count: 10, r12n: 1, epsN: 1 }),
+    readCurrentSnapshotImpl: async () => null,
+    writeLocalSnapshotImpl: async () => {
+      wrote = true;
+      return { path: "/tmp/latest-snapshot.json" };
+    },
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(wrote, true);
+});
+
+test("refreshSnapshot skips the regression guard when reading the previous snapshot fails", async () => {
+  const { refreshSnapshot } = await import("../lib/refresh-service.js");
+  let wrote = false;
+
+  const result = await refreshSnapshot({
+    target: "local",
+    minRetentionRatio: 0.7,
+    buildSnapshotImpl: async () =>
+      snapshotWithMetrics({ count: 10, r12n: 1, epsN: 1 }),
+    readCurrentSnapshotImpl: async () => {
+      throw new Error("previous snapshot unavailable");
+    },
+    writeLocalSnapshotImpl: async () => {
+      wrote = true;
+      return { path: "/tmp/latest-snapshot.json" };
+    },
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(wrote, true);
 });
 
 test("api refresh returns 401 JSON when unauthorized", async () => {
