@@ -12,6 +12,13 @@ import { getRuntimeConfig } from "../lib/runtime-config.js";
 import { loadSnapshot } from "../lib/snapshot-service.js";
 
 export const ROOT_DIR = dirname(dirname(fileURLToPath(import.meta.url)));
+const PUBLIC_STATIC_FILES = new Set([
+  "favicon.ico",
+  "index.html",
+  "robots.txt",
+  "thumbnail.png",
+]);
+const PUBLIC_STATIC_PREFIXES = ["assets/", "public/"];
 
 export function contentTypeFor(filePath) {
   switch (extname(filePath)) {
@@ -21,6 +28,17 @@ export function contentTypeFor(filePath) {
       return "application/json; charset=utf-8";
     case ".png":
       return "image/png";
+    case ".svg":
+      return "image/svg+xml; charset=utf-8";
+    case ".ico":
+      return "image/x-icon";
+    case ".jpg":
+    case ".jpeg":
+      return "image/jpeg";
+    case ".webp":
+      return "image/webp";
+    case ".css":
+      return "text/css; charset=utf-8";
     case ".js":
     case ".mjs":
       return "text/javascript; charset=utf-8";
@@ -41,6 +59,11 @@ function resolveStaticFile(rootDir, pathname) {
   const relativePath = pathname === "/" ? "index.html" : pathname.replace(/^\/+/, "");
   const normalizedPath = normalize(relativePath);
   const resolvedRoot = resolve(rootDir);
+
+  if (!isPublicStaticPath(normalizedPath)) {
+    return null;
+  }
+
   const resolvedPath = resolve(rootDir, normalizedPath);
 
   if (!isPathInside(resolvedRoot, resolvedPath)) {
@@ -48,6 +71,14 @@ function resolveStaticFile(rootDir, pathname) {
   }
 
   return resolvedPath;
+}
+
+function isPublicStaticPath(relativePath) {
+  const segments = relativePath.split("/").filter(Boolean);
+  if (segments.length === 0) return false;
+  if (segments.some((segment) => segment.startsWith("."))) return false;
+  if (PUBLIC_STATIC_FILES.has(relativePath)) return true;
+  return PUBLIC_STATIC_PREFIXES.some((prefix) => relativePath.startsWith(prefix));
 }
 
 function isPathInside(parentPath, childPath) {

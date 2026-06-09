@@ -35,6 +35,7 @@ test("startDevServer serves static UI, snapshot, and authorized refresh", async 
   await mkdir(dataDir, { recursive: true });
   await writeFile(snapshotPath, JSON.stringify(createSnapshot("11504")));
   await writeFile(join(rootDir, "index.html"), "<!doctype html><title>TW</title><h1>TW</h1>");
+  await writeFile(join(rootDir, "thumbnail.png"), "png");
 
   const server = await startDevServer({
     rootDir,
@@ -49,6 +50,10 @@ test("startDevServer serves static UI, snapshot, and authorized refresh", async 
     const homeResponse = await fetch(server.url);
     assert.equal(homeResponse.status, 200);
     assert.match(await homeResponse.text(), /TW/u);
+
+    const imageResponse = await fetch(`${server.url}/thumbnail.png`);
+    assert.equal(imageResponse.status, 200);
+    assert.equal(imageResponse.headers.get("content-type"), "image/png");
 
     const snapshotResponse = await fetch(`${server.url}/api/snapshot`);
     assert.equal(snapshotResponse.status, 200);
@@ -81,6 +86,37 @@ test("startDevServer serves static UI, snapshot, and authorized refresh", async 
   }
 });
 
+test("startDevServer only serves the public app assets", async () => {
+  const { startDevServer } = await import("../scripts/dev-server.mjs");
+  const rootDir = await mkdtemp(join(tmpdir(), "twse-dev-"));
+  const dataDir = join(rootDir, "data");
+
+  await mkdir(dataDir, { recursive: true });
+  await writeFile(join(dataDir, "latest-snapshot.json"), JSON.stringify(createSnapshot("11504")));
+  await writeFile(join(rootDir, "index.html"), "<!doctype html><title>TW</title><h1>TW</h1>");
+  await writeFile(join(rootDir, ".env.local"), "SECRET=value");
+
+  const server = await startDevServer({
+    rootDir,
+    env: {
+      PORT: "0",
+      REFRESH_SECRET: "local-secret",
+    },
+    buildSnapshotImpl: async () => createSnapshot("11505"),
+  });
+
+  try {
+    const dotfileResponse = await fetch(`${server.url}/.env.local`);
+    assert.equal(dotfileResponse.status, 404);
+    assert.equal(await dotfileResponse.text(), "Not found");
+
+    const dataFileResponse = await fetch(`${server.url}/data/latest-snapshot.json`);
+    assert.equal(dataFileResponse.status, 404);
+    assert.equal(await dataFileResponse.text(), "Not found");
+  } finally {
+    await server.close();
+  }
+});
 test("startDevServer returns 404 for missing static files", async () => {
   const { startDevServer } = await import("../scripts/dev-server.mjs");
   const rootDir = await mkdtemp(join(tmpdir(), "twse-dev-"));
