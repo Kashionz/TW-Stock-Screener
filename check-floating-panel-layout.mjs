@@ -39,6 +39,18 @@ const requiredMarkers = [
     label: "desktop light overlay",
     ok: /background:linear-gradient\(90deg,\s*rgba\(245,247,250,0\)/.test(html),
   },
+  {
+    label: "desktop drawer shell visible by default",
+    ok: /\.dr\{[\s\S]*?transform:translateX\(0\);[\s\S]*?opacity:1;[\s\S]*?pointer-events:auto;[\s\S]*?\}/.test(
+      html,
+    ),
+  },
+  {
+    label: "mobile drawer remains hidden until open",
+    ok: /@media \(max-width:1180px\)\{[\s\S]*?\.dr\{[\s\S]*?display:none;[\s\S]*?transform:translateX\(104%\);[\s\S]*?opacity:0;[\s\S]*?pointer-events:none;[\s\S]*?\}[\s\S]*?\.dr\.on\{[\s\S]*?display:grid;[\s\S]*?transform:translateX\(0\);[\s\S]*?opacity:1;[\s\S]*?pointer-events:auto;[\s\S]*?\}/.test(
+      html,
+    ),
+  },
 ];
 
 const missing = requiredMarkers.filter((marker) => !marker.ok);

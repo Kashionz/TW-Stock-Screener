@@ -830,9 +830,9 @@ tr.focus.current td{background:#e8f0ff}
   border-radius:32px;
   background:rgba(255,255,255,.98);
   box-shadow:var(--shadow-lg);
-  transform:translateX(calc(100% + 32px));
-  opacity:0;
-  pointer-events:none;
+  transform:translateX(0);
+  opacity:1;
+  pointer-events:auto;
   transition:transform .22s ease, opacity .22s ease;
   z-index:24;
 }
@@ -1199,10 +1199,15 @@ textarea{
     min-height:100vh;
     border-radius:32px 0 0 32px;
     transform:translateX(104%);
+    opacity:0;
+    pointer-events:none;
   }
 
   .dr.on{
     display:grid;
+    transform:translateX(0);
+    opacity:1;
+    pointer-events:auto;
   }
 }
 
