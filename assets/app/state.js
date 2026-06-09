@@ -15,6 +15,8 @@ const STORE_KEY = "twse_screener_v1";
 const REFRESH_KEY_STORE = "twse_screener_refresh_key_v1";
 
 export const PAGE_SIZE = 50;
+export const DRAWER_SECTIONS = ["overview", "charts", "financials", "notes"];
+export const DEFAULT_DRAWER_SECTION = DRAWER_SECTIONS[0];
 
 function loadStore() {
   try {
@@ -64,6 +66,7 @@ export function createAppState(initialSnapshot) {
     currentCode: null,
     currentRow: null,
     epsMode: "S",
+    drawerSection: DEFAULT_DRAWER_SECTION,
   };
 
   applySnapshot(state, initialSnapshot);
@@ -159,9 +162,15 @@ export function setCurrentCode(state, code) {
   return state.currentRow;
 }
 
+export function setDrawerSection(state, section) {
+  state.drawerSection = DRAWER_SECTIONS.includes(section) ? section : DEFAULT_DRAWER_SECTION;
+  return state.drawerSection;
+}
+
 export function clearCurrentRow(state) {
   state.currentCode = null;
   state.currentRow = null;
+  state.drawerSection = DEFAULT_DRAWER_SECTION;
 }
 
 export function getFilteredRows(state, filters) {
