@@ -1,4 +1,4 @@
-import { applySnapshot, setRefreshKey } from "./state.js";
+import { applySnapshot } from "./state.js";
 import { revLabel } from "./helpers.js";
 
 function isSnapshotPayload(snapshot) {
@@ -7,7 +7,7 @@ function isSnapshotPayload(snapshot) {
 
 function unavailableMessage(runtime) {
   if (runtime?.hasLiveApi) return "";
-  return "目前是靜態檔模式；若要測試設定更新金鑰與更新個股資訊，請改用 npm run dev 或 npm run dev:vercel。";
+  return "目前是靜態檔模式；若要測試更新個股資訊，請改用 npm run dev 或 npm run dev:vercel。";
 }
 
 export function createRefreshFlow({ state, ui, runtime }) {
@@ -69,30 +69,6 @@ export function createRefreshFlow({ state, ui, runtime }) {
     return true;
   }
 
-  async function promptRefreshKey() {
-    if (!runtime?.hasLiveApi) {
-      ui.setRefreshStatus(unavailableMessage(runtime), "err");
-      return false;
-    }
-
-    const entered = window.prompt(
-      "輸入手動更新金鑰；留空後按確定可清除此瀏覽器內已儲存的金鑰。",
-      state.refreshKey,
-    );
-    if (entered === null) return false;
-
-    const nextKey = entered.trim();
-    setRefreshKey(state, nextKey);
-    ui.updateRefreshControls();
-    ui.setRefreshStatus(
-      nextKey
-        ? "已儲存更新金鑰，之後可直接抓取最新資料。"
-        : "已清除更新金鑰，目前只會重新載入既有快照。",
-      nextKey ? "ok" : "",
-    );
-    return true;
-  }
-
   async function refreshCurrentStock() {
     if (state.refreshBusy || !state.currentCode) return;
     if (!refreshUrl) {
@@ -101,9 +77,7 @@ export function createRefreshFlow({ state, ui, runtime }) {
     }
 
     if (!state.refreshKey) {
-      await reloadCurrentSnapshot(
-        "已重新載入目前快照；若要重抓交易所最新資料，請先設定更新金鑰。",
-      );
+      await reloadCurrentSnapshot("已重新載入最新快照。");
       return;
     }
 
@@ -155,7 +129,6 @@ export function createRefreshFlow({ state, ui, runtime }) {
 
   return {
     hydrateLatestSnapshot,
-    promptRefreshKey,
     refreshCurrentStock,
     reloadCurrentSnapshot,
   };
