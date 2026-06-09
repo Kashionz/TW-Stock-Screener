@@ -9,6 +9,8 @@ import {
 } from "../lib/refresh-auth.js";
 import { refreshSnapshot } from "../lib/refresh-service.js";
 import { getRuntimeConfig } from "../lib/runtime-config.js";
+import { SECURITY_HEADERS } from "../lib/security-headers.js";
+import { snapshotEtag } from "../lib/snapshot-etag.js";
 import { loadSnapshot } from "../lib/snapshot-service.js";
 import { writeLocalSnapshot } from "../lib/snapshot-store.js";
 
@@ -122,14 +124,25 @@ async function resolveServableStaticFile(rootDir, realRootDir, pathname) {
   return realFilePath;
 }
 
-async function handleSnapshotRequest(res, dataSnapshotPath) {
+async function handleSnapshotRequest(req, res, dataSnapshotPath) {
   const snapshot = await loadSnapshot({
     source: "local",
     readLocalSnapshotImpl: async () => JSON.parse(await readFile(dataSnapshotPath, "utf8")),
   });
+  const etag = snapshotEtag(snapshot);
+
+  if (req.headers["if-none-match"] === etag) {
+    res.writeHead(304, {
+      "cache-control": "no-store",
+      etag,
+    });
+    res.end();
+    return;
+  }
 
   sendJson(res, 200, snapshot, {
     "cache-control": "no-store",
+    etag,
   });
 }
 
@@ -169,6 +182,7 @@ async function handleStaticRequest(res, rootDir, realRootDir, pathname) {
   const body = await readFile(filePath);
   res.writeHead(200, {
     "content-type": contentTypeFor(filePath),
+    ...SECURITY_HEADERS,
   });
   res.end(body);
 }
@@ -194,7 +208,7 @@ export async function startDevServer({
       }
 
       if (requestUrl.pathname === "/api/snapshot") {
-        await handleSnapshotRequest(res, dataSnapshotPath);
+        await handleSnapshotRequest(req, res, dataSnapshotPath);
         return;
       }
 

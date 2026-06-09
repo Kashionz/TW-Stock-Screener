@@ -1,11 +1,25 @@
 import { loadSnapshot } from "../lib/snapshot-service.js";
+import { snapshotEtag } from "../lib/snapshot-etag.js";
 
-export async function GET() {
+export async function GET(request) {
   try {
     const snapshot = await loadSnapshot({ source: "best" });
+    const etag = snapshotEtag(snapshot);
+
+    if (request?.headers?.get("if-none-match") === etag) {
+      return new Response(null, {
+        status: 304,
+        headers: {
+          "Cache-Control": "no-store",
+          ETag: etag,
+        },
+      });
+    }
+
     return Response.json(snapshot, {
       headers: {
         "Cache-Control": "no-store",
+        ETag: etag,
       },
     });
   } catch (error) {

@@ -18,14 +18,22 @@ export function createRefreshFlow({ state, ui, runtime }) {
     if (!snapshotUrl) return false;
 
     try {
+      const headers = {};
+      if (state.snapshotEtag) headers["if-none-match"] = state.snapshotEtag;
+
       const response = await fetch(snapshotUrl, {
         cache: "no-store",
+        headers,
       });
+      // 304: the deployed seed already matches the live snapshot, so the current
+      // view is up to date and there is no body to download.
+      if (response.status === 304) return true;
       if (!response.ok) return false;
 
       const nextSnapshot = await response.json();
       if (!isSnapshotPayload(nextSnapshot)) return false;
 
+      state.snapshotEtag = response.headers.get("etag") || state.snapshotEtag;
       ui.resetDrawer();
       applySnapshot(state, nextSnapshot);
       ui.syncSnapshotMeta();

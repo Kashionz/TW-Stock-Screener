@@ -55,6 +55,7 @@ export function createAppState(initialSnapshot) {
     incLabel: "",
     store: loadStore(),
     refreshKey: loadRefreshKey(),
+    snapshotEtag: null,
     refreshBusy: false,
     view: "all",
     sortKey: "score",
