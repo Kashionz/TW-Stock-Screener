@@ -17,6 +17,15 @@ const requiredMarkers = [
       /\.hero\.hero-expanded #heroPlaybook/.test(html),
   },
   {
+    label: "structured source details",
+    ok:
+      html.includes('id="sourceFrequency"') &&
+      html.includes('id="sourceOrigin"') &&
+      html.includes('id="sourceCoverage"') &&
+      html.includes('class="source-list"') &&
+      !html.includes('id="snapshotMeta"'),
+  },
+  {
     label: "merged price column header",
     ok: html.includes('data-s="price">股價') && !html.includes('data-s="chg"'),
   },

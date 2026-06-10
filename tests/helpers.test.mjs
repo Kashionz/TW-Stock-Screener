@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { escapeHtml, formatChange } from "../assets/app/helpers.js";
+import { escapeHtml, formatChange, snapshotCoverageLabel } from "../assets/app/helpers.js";
 
 test("escapeHtml neutralizes HTML-significant characters", () => {
   assert.equal(
@@ -22,4 +22,8 @@ test("formatChange renders event text before numeric fallbacks", () => {
   assert.equal(formatChange({ chg: null, chgText: "除息" }), '<span class="muted">除息</span>');
   assert.equal(formatChange({ chg: 8, chgText: null }), '<span class="pos">+8.0</span>');
   assert.equal(formatChange({ chg: null, chgText: null }), '<span class="muted">—</span>');
+});
+
+test("snapshotCoverageLabel formats listed and OTC coverage", () => {
+  assert.equal(snapshotCoverageLabel({ tw: 1070, otc: 884, count: 1954 }), "上市 1070 ＋ 上櫃 884 ＝ 1954 檔");
 });

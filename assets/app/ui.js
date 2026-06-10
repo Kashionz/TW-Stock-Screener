@@ -21,7 +21,7 @@ import {
   revLabel,
   rocDateLabel,
   signedFmt,
-  snapshotHeader,
+  snapshotCoverageLabel,
   ymLabel,
 } from "./helpers.js";
 
@@ -170,7 +170,9 @@ export function collectDom(documentRoot = document) {
     summaryFocus: documentRoot.getElementById("summaryFocus"),
     summaryWatch: documentRoot.getElementById("summaryWatch"),
     summaryView: documentRoot.getElementById("summaryView"),
-    snapshotMeta: documentRoot.getElementById("snapshotMeta"),
+    sourceFrequency: documentRoot.getElementById("sourceFrequency"),
+    sourceOrigin: documentRoot.getElementById("sourceOrigin"),
+    sourceCoverage: documentRoot.getElementById("sourceCoverage"),
     noteIncLabel: documentRoot.getElementById("noteIncLabel"),
     ov: documentRoot.getElementById("ov"),
     dr: documentRoot.getElementById("dr"),
@@ -234,7 +236,6 @@ export function createAppUi({ state, dom, runtime }) {
   function syncSnapshotMeta() {
     const { meta } = state.snapshot;
 
-    dom.snapshotMeta.textContent = snapshotHeader(meta);
     dom.noteIncLabel.textContent = state.incLabel;
     dom.runtimeChip.textContent = runtime && runtime.hasLiveApi ? "本機更新模式" : "靜態快照模式";
     dom.heroCoverage.textContent = `${meta.count.toLocaleString()} 檔股票`;
@@ -244,6 +245,9 @@ export function createAppUi({ state, dom, runtime }) {
     dom.statRevenuePeriod.textContent = revLabel(meta.revPeriodROC);
     dom.statIncomePeriod.textContent = state.incLabel;
     dom.statValuationDate.textContent = rocDateLabel(meta.valDateROC);
+    dom.sourceFrequency.textContent = "每天更新一次";
+    dom.sourceOrigin.textContent = "證交所、櫃買中心、公開資訊觀測站";
+    dom.sourceCoverage.textContent = snapshotCoverageLabel(meta);
   }
 
   function setRefreshStatus(message, tone = "") {

@@ -252,17 +252,18 @@ main > h1{
 
 .hero-card{
   display:grid;
-  gap:14px;
+  gap:18px;
   min-height:100%;
   padding:22px;
+  border:1px solid rgba(222,225,230,.92);
   border-radius:30px;
-  background:var(--surface-dark);
-  color:var(--canvas);
-  box-shadow:var(--shadow-lg);
+  background:rgba(255,255,255,.92);
+  color:var(--ink);
+  box-shadow:var(--shadow-sm);
 }
 
 .hero-card h2{
-  margin:0 0 10px;
+  margin:0 0 8px;
   font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
   font-size:22px;
   font-weight:500;
@@ -271,7 +272,7 @@ main > h1{
 
 .hero-card p{
   margin:0;
-  color:rgba(255,255,255,.7);
+  color:var(--body);
   font-size:14px;
 }
 
@@ -283,14 +284,14 @@ main > h1{
 
 .hero-meta-card{
   padding:12px 14px;
-  border:1px solid rgba(255,255,255,.1);
+  border:1px solid rgba(222,225,230,.9);
   border-radius:18px;
-  background:rgba(255,255,255,.04);
+  background:linear-gradient(180deg,#ffffff 0%,#f7f8fa 100%);
 }
 
 .hero-meta-card span{
   display:block;
-  color:rgba(255,255,255,.62);
+  color:var(--muted);
   font-size:12px;
 }
 
@@ -305,10 +306,10 @@ main > h1{
 
 .period-list{
   display:grid;
-  gap:8px;
-  padding:12px 0;
-  border-top:1px solid rgba(255,255,255,.1);
-  border-bottom:1px solid rgba(255,255,255,.1);
+  gap:10px;
+  padding:14px 0;
+  border-top:1px solid var(--line-soft);
+  border-bottom:1px solid var(--line-soft);
 }
 
 .period-row{
@@ -319,7 +320,7 @@ main > h1{
 }
 
 .period-row span{
-  color:rgba(255,255,255,.62);
+  color:var(--muted);
   font-size:13px;
 }
 
@@ -327,12 +328,35 @@ main > h1{
   font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
   font-size:16px;
   font-weight:500;
+  text-align:right;
 }
 
-.snapshot-meta{
-  color:rgba(255,255,255,.62);
+.source-list{
+  display:grid;
+  gap:12px;
+  margin:0;
+}
+
+.source-row{
+  display:grid;
+  grid-template-columns:72px minmax(0,1fr);
+  gap:12px;
+  margin:0;
+}
+
+.source-row dt{
+  margin:0;
+  color:var(--muted);
   font-size:12px;
-  line-height:1.7;
+  font-weight:600;
+  letter-spacing:.01em;
+}
+
+.source-row dd{
+  margin:0;
+  color:var(--ink);
+  font-size:13px;
+  line-height:1.65;
 }
 
 .summary-grid{
@@ -1453,8 +1477,7 @@ textarea{
   }
 
   .playbook,
-  .summary-grid,
-  .hero-meta{
+  .summary-grid{
     grid-template-columns:1fr;
   }
 
@@ -1474,6 +1497,15 @@ textarea{
 @media (max-width:720px){
   .hero-copy h2{
     max-width:none;
+  }
+
+  .hero-meta{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+
+  .source-row{
+    grid-template-columns:1fr;
+    gap:4px;
   }
 
   .filter-grid{
@@ -1655,7 +1687,7 @@ textarea{
       <aside class="hero-card" id="heroSnapshot">
         <div>
           <h2>資料來源</h2>
-          <p>資料來自證交所、櫃買中心和公開資訊觀測站，每天更新一次。</p>
+          <p>快速確認這批快照涵蓋哪些股票、目前對應到哪一期資料。</p>
         </div>
 
         <div class="hero-meta">
@@ -1688,7 +1720,20 @@ textarea{
           </div>
         </div>
 
-        <p class="snapshot-meta" id="snapshotMeta">資料快照載入中</p>
+        <dl class="source-list" aria-label="資料來源明細">
+          <div class="source-row">
+            <dt>更新頻率</dt>
+            <dd id="sourceFrequency">每天更新一次</dd>
+          </div>
+          <div class="source-row">
+            <dt>資料來源</dt>
+            <dd id="sourceOrigin">證交所、櫃買中心、公開資訊觀測站</dd>
+          </div>
+          <div class="source-row">
+            <dt>涵蓋範圍</dt>
+            <dd id="sourceCoverage">資料快照載入中</dd>
+          </div>
+        </dl>
       </aside>
     </section>
 

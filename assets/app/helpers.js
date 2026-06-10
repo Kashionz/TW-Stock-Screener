@@ -23,8 +23,8 @@ export function revLabel(value) {
   return `${Number(period.slice(0, 3)) + 1911}年${Number(period.slice(3))}月`;
 }
 
-export function snapshotHeader(meta) {
-  return `目前資料：月營收 ${revLabel(meta.revPeriodROC)} ｜ 損益表 ${quarterLabel(meta.incQuarter)} ｜ 估值/股價 ${rocDateLabel(meta.valDateROC)} ｜ 來源：證交所、櫃買中心、公開資訊觀測站（上市 ${meta.tw} ＋ 上櫃 ${meta.otc} ＝ ${meta.count} 檔）`;
+export function snapshotCoverageLabel(meta) {
+  return `上市 ${meta.tw} ＋ 上櫃 ${meta.otc} ＝ ${meta.count} 檔`;
 }
 
 export function fmt(value, digits = 2) {
