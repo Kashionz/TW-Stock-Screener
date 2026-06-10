@@ -68,16 +68,13 @@ const SORT_LABELS = {
   score: "評級",
   ph: "措辭數",
   name: "公司代號",
-  ind: "產業",
   yoy: "月營收 YoY",
   ytdYoy: "累計 YoY",
   gm: "毛利率",
   eps: "EPS",
   epsYoY: "單季 EPS YoY",
   pe: "本益比",
-  pb: "淨值比",
   price: "股價",
-  chg: "漲跌",
 };
 
 const VIEW_LABELS = {
@@ -157,9 +154,12 @@ export function collectDom(documentRoot = document) {
     exLumpy: documentRoot.getElementById("exLumpy"),
     count: documentRoot.getElementById("count"),
     pager: documentRoot.getElementById("pager"),
+    pagerBottom: documentRoot.getElementById("pagerBottom"),
     tb: documentRoot.getElementById("tb"),
     runtimeChip: documentRoot.getElementById("runtimeChip"),
     heroCoverage: documentRoot.getElementById("heroCoverage"),
+    hero: documentRoot.querySelector(".hero"),
+    heroToggle: documentRoot.getElementById("heroToggle"),
     statUniverse: documentRoot.getElementById("statUniverse"),
     statListed: documentRoot.getElementById("statListed"),
     statOtc: documentRoot.getElementById("statOtc"),
@@ -237,7 +237,7 @@ export function createAppUi({ state, dom, runtime }) {
     dom.snapshotMeta.textContent = snapshotHeader(meta);
     dom.noteIncLabel.textContent = state.incLabel;
     dom.runtimeChip.textContent = runtime && runtime.hasLiveApi ? "本機更新模式" : "靜態快照模式";
-    dom.heroCoverage.textContent = `${meta.count.toLocaleString()} 檔研究宇宙`;
+    dom.heroCoverage.textContent = `${meta.count.toLocaleString()} 檔股票`;
     dom.statUniverse.textContent = meta.count.toLocaleString();
     dom.statListed.textContent = meta.tw.toLocaleString();
     dom.statOtc.textContent = meta.otc.toLocaleString();
@@ -247,8 +247,9 @@ export function createAppUi({ state, dom, runtime }) {
   }
 
   function setRefreshStatus(message, tone = "") {
-    dom.dRefreshStatus.className = `muted refreshstatus${tone ? ` ${tone}` : ""}`;
-    dom.dRefreshStatus.textContent = message || "";
+    const text = message || "";
+    dom.dRefreshStatus.className = `muted refreshstatus${text ? "" : " is-empty"}${tone ? ` ${tone}` : ""}`;
+    dom.dRefreshStatus.textContent = text;
   }
 
   function updateRefreshControls() {
@@ -289,9 +290,12 @@ export function createAppUi({ state, dom, runtime }) {
   function renderPager(total) {
     const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
     state.page = Math.min(state.page, pages);
+    const targets = [dom.pager, dom.pagerBottom].filter(Boolean);
 
     if (total <= PAGE_SIZE) {
-      dom.pager.innerHTML = "";
+      for (const target of targets) {
+        target.innerHTML = "";
+      }
       return;
     }
 
@@ -305,13 +309,32 @@ export function createAppUi({ state, dom, runtime }) {
       );
     }
 
-    dom.pager.innerHTML =
+    const markup =
       `<span class="pagerstat">第 ${state.page} / ${pages} 頁</span>` +
       `<div class="pagernav">` +
       `<button data-page="prev" ${state.page === 1 ? "disabled" : ""}>上一頁</button>` +
       parts.join("") +
       `<button data-page="next" ${state.page === pages ? "disabled" : ""}>下一頁</button>` +
       "</div>";
+
+    for (const target of targets) {
+      target.innerHTML = markup;
+    }
+  }
+
+  function renderSortIndicators() {
+    for (const header of dom.sortHeaders) {
+      const active = header.dataset.s === state.sortKey;
+      const arrow = header.querySelector(".arr");
+      if (arrow) {
+        arrow.textContent = active ? (state.sortDir === -1 ? "▼" : "▲") : "";
+      }
+      if (active) {
+        header.setAttribute("aria-sort", state.sortDir === -1 ? "descending" : "ascending");
+      } else {
+        header.removeAttribute("aria-sort");
+      }
+    }
   }
 
   function render() {
@@ -341,6 +364,7 @@ export function createAppUi({ state, dom, runtime }) {
     dom.summaryView.textContent = VIEW_LABELS[state.view] || VIEW_LABELS.all;
 
     renderPager(filteredRows.length);
+    renderSortIndicators();
 
     dom.tb.innerHTML = filteredRows
       .slice(start, start + PAGE_SIZE)
@@ -366,11 +390,10 @@ export function createAppUi({ state, dom, runtime }) {
         return (
           `<tr class="row${focus ? " focus" : ""}${state.currentCode === code ? " current" : ""}" data-c="${code}">` +
           `<td><span class="star${getRecordState(state, code).star ? " on" : ""}" data-star="${code}">★</span></td>` +
-          `<td class="l"><span class="name">${escapeHtml(row.name)}</span> <span class="code">${code}</span>${marketBadge}</td>` +
-          `<td class="l hideT hideM"><span class="muted">${escapeHtml(row.ind)}</span></td>` +
+          `<td class="l"><span class="company"><span class="name" title="${escapeHtml(row.name)}">${escapeHtml(row.name)}</span><span class="cmeta"><span class="code">${code}</span>${marketBadge}</span></span></td>` +
           `<td>${pct(row.yoy)}</td><td class="hideM">${pct(row.ytdYoy)}</td><td class="hideM">${signedFmt(row.gm, 1)}</td>` +
-          `<td class="hideS">${signedFmt(row.eps, 2)}</td><td class="hideS">${pct(row.epsYoY)}</td><td class="hideS">${fmt(row.pe, 1)}</td><td class="hideT hideM">${fmt(row.pb, 2)}</td>` +
-          `<td class="hideS">${fmt(row.price, 2)}</td><td class="hideT hideM">${formatChange(row)}</td>` +
+          `<td class="hideS">${signedFmt(row.eps, 2)}</td><td class="hideS">${pct(row.epsYoY)}</td><td class="hideS hideN">${fmt(row.pe, 1)}</td>` +
+          `<td>${fmt(row.price, 2)}<span class="chg-sub">${formatChange(row)}</span></td>` +
           `<td class="hideS"><span class="badge ${phraseBadgeClass}">${phraseCount}/7</span></td><td>${rating}</td>` +
           "</tr>"
         );
@@ -578,9 +601,7 @@ export function createAppUi({ state, dom, runtime }) {
     setRefreshStatus(
       runtime && !runtime.hasLiveApi
         ? "目前是靜態檔模式；若要測試更新個股資訊，請改用 npm run dev 或 npm run dev:vercel。"
-        : state.refreshKey
-          ? "可手動抓取最新快照，並重新載入這檔資料。"
-          : "點「更新個股資訊」可重新載入最新快照。",
+        : "",
     );
     updateRefreshControls();
 

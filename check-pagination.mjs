@@ -5,6 +5,8 @@ const source = readFrontendSource();
 
 const requiredMarkers = [
   { label: "pagination container", ok: html.includes('id="pager"') },
+  { label: "bottom pagination container", ok: html.includes('id="pagerBottom"') },
+  { label: "dual pager render", ok: source.includes("[dom.pager, dom.pagerBottom]") },
   { label: "page state", ok: source.includes("page: 1") },
   { label: "page size", ok: source.includes("export const PAGE_SIZE = 50") },
   { label: "paged slice", ok: source.includes(".slice(start, start + PAGE_SIZE)") },
