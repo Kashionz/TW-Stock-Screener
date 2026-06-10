@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   applyDrawerSectionUi,
+  buildPagerWindow,
   buildFinancialTable,
   buildDrawerMeta,
   getQuickStats,
@@ -47,6 +48,14 @@ test("getQuickStats keeps the overview cards to the four primary metrics", () =>
     stats.map(([label]) => label),
     ["月營收YoY", "累計YoY", "毛利率", "EPS(季)"],
   );
+});
+
+test("buildPagerWindow keeps the visible page buttons capped at three", () => {
+  assert.deepEqual(buildPagerWindow(1, 9), [1, 2, 3]);
+  assert.deepEqual(buildPagerWindow(2, 9), [1, 2, 3]);
+  assert.deepEqual(buildPagerWindow(3, 9), [2, 3, 4]);
+  assert.deepEqual(buildPagerWindow(8, 9), [7, 8, 9]);
+  assert.deepEqual(buildPagerWindow(9, 9), [7, 8, 9]);
 });
 
 test("buildFinancialTable marks the unsupported-state row for centered layout", () => {

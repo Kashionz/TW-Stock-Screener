@@ -78,6 +78,14 @@ const SORT_LABELS = {
   price: "股價",
 };
 
+export function buildPagerWindow(currentPage, totalPages, maxVisible = 3) {
+  const visible = Math.max(1, Math.min(maxVisible, totalPages));
+  const start = Math.max(1, Math.min(currentPage - Math.floor(visible / 2), totalPages - visible + 1));
+  const end = start + visible - 1;
+
+  return Array.from({ length: visible }, (_, index) => start + index).filter((page) => page <= end);
+}
+
 export function getQuickStats(row) {
   return [
     ["月營收YoY", pct(row.yoy)],
@@ -297,11 +305,10 @@ export function createAppUi({ state, dom, runtime }) {
       return;
     }
 
-    const startPage = Math.max(1, state.page - 2);
-    const endPage = Math.min(pages, state.page + 2);
+    const pageWindow = buildPagerWindow(state.page, pages);
     const parts = [];
 
-    for (let page = startPage; page <= endPage; page += 1) {
+    for (const page of pageWindow) {
       parts.push(
         `<button class="${page === state.page ? "on" : ""}" data-page="${page}">${page}</button>`,
       );
