@@ -147,13 +147,13 @@ a{color:inherit}
 .hero{
   display:grid;
   grid-template-columns:minmax(0,1.2fr) minmax(360px,.8fr);
-  gap:28px;
-  padding:52px 0 40px;
+  gap:24px;
+  padding:32px 0 28px;
 }
 
 .hero-copy{
   display:grid;
-  gap:24px;
+  gap:18px;
   align-content:start;
 }
 
@@ -171,11 +171,11 @@ main > h1{
 
 .hero-copy h2{
   margin:0;
-  max-width:10.5em;
+  max-width:16em;
   font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
-  font-size:clamp(40px,5vw,72px);
+  font-size:clamp(30px,3.2vw,46px);
   font-weight:400;
-  line-height:1.02;
+  line-height:1.1;
   letter-spacing:-.05em;
 }
 
@@ -204,15 +204,19 @@ main > h1{
   font-size:13px;
 }
 
+.hero-toggle{
+  display:none;
+}
+
 .playbook{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:16px;
+  gap:12px;
 }
 
 .playbook-card{
   min-height:100%;
-  padding:18px 20px;
+  padding:14px 16px;
   border:1px solid rgba(222,225,230,.9);
   border-radius:var(--radius-md);
   background:rgba(255,255,255,.92);
@@ -225,7 +229,7 @@ main > h1{
   justify-content:center;
   min-width:44px;
   min-height:26px;
-  margin-bottom:12px;
+  margin-bottom:8px;
   border-radius:var(--radius-pill);
   background:var(--surface-strong);
   color:var(--ink);
@@ -236,7 +240,7 @@ main > h1{
 
 .playbook-card h2{
   margin:0 0 8px;
-  font-size:17px;
+  font-size:15px;
   font-weight:600;
 }
 
@@ -248,9 +252,9 @@ main > h1{
 
 .hero-card{
   display:grid;
-  gap:20px;
+  gap:14px;
   min-height:100%;
-  padding:28px;
+  padding:22px;
   border-radius:30px;
   background:var(--surface-dark);
   color:var(--canvas);
@@ -260,7 +264,7 @@ main > h1{
 .hero-card h2{
   margin:0 0 10px;
   font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
-  font-size:28px;
+  font-size:22px;
   font-weight:500;
   letter-spacing:-.03em;
 }
@@ -278,7 +282,7 @@ main > h1{
 }
 
 .hero-meta-card{
-  padding:16px 18px;
+  padding:12px 14px;
   border:1px solid rgba(255,255,255,.1);
   border-radius:18px;
   background:rgba(255,255,255,.04);
@@ -294,15 +298,15 @@ main > h1{
   display:block;
   margin-top:8px;
   font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
-  font-size:26px;
+  font-size:22px;
   font-weight:500;
   letter-spacing:-.04em;
 }
 
 .period-list{
   display:grid;
-  gap:12px;
-  padding:18px 0;
+  gap:8px;
+  padding:12px 0;
   border-top:1px solid rgba(255,255,255,.1);
   border-bottom:1px solid rgba(255,255,255,.1);
 }
@@ -369,7 +373,7 @@ main > h1{
 
 .workspace{
   display:grid;
-  grid-template-columns:1fr;
+  grid-template-columns:minmax(0,1fr) clamp(340px,28vw,420px);
   gap:22px;
   align-items:start;
 }
@@ -414,6 +418,22 @@ main > h1{
   font-size:13px;
 }
 
+/* 篩選面板專屬：標題齊左對齊輸入框、收斂 hero 級距與留白（不影響研究清單） */
+.filter-panel .panel-head{
+  padding:0;
+  margin:0 0 16px;
+}
+
+.filter-panel .panel-head h2{
+  font-size:20px;
+  letter-spacing:-.01em;
+  margin:0 0 4px;
+}
+
+.filter-panel .panel-head p{
+  line-height:1.4;
+}
+
 .filter-panel{
   padding:24px;
   background:
@@ -422,9 +442,24 @@ main > h1{
 
 .filter-grid{
   display:grid;
-  grid-template-columns:2.2fr repeat(5,minmax(0,1fr)) 1.15fr;
+  grid-template-columns:repeat(12,minmax(0,1fr));
   gap:12px;
   align-items:end;
+}
+
+.filter-grid .fld:nth-child(1){
+  grid-column:span 6;
+}
+
+.filter-grid .fld:nth-child(2),
+.filter-grid .fld:nth-child(3){
+  grid-column:span 3;
+}
+
+.filter-grid .fld:nth-child(4),
+.filter-grid .fld:nth-child(5),
+.filter-grid .fld:nth-child(6){
+  grid-column:span 2;
 }
 
 .fld{
@@ -436,6 +471,19 @@ main > h1{
 .fld label{
   color:var(--muted);
   font-size:12px;
+  display:flex;
+  align-items:baseline;
+  gap:4px;
+  white-space:nowrap;
+  letter-spacing:-.01em;
+  line-height:1.2;
+}
+
+.fld label .req{
+  color:var(--muted-soft);
+  font-weight:400;
+  letter-spacing:0;
+  font-variant-numeric:normal;
 }
 
 .fld input[type=text],
@@ -463,8 +511,11 @@ textarea:focus{
 }
 
 .flag-group{
-  display:grid;
-  gap:10px;
+  display:contents;
+}
+
+.flag-group .chk{
+  grid-column:span 3;
 }
 
 .chk{
@@ -599,6 +650,21 @@ textarea:focus{
   white-space:nowrap;
 }
 
+.table-tools-bottom{
+  justify-content:flex-end;
+  padding-top:18px;
+}
+
+th .arr{
+  margin-left:3px;
+  font-size:9px;
+  color:var(--primary);
+}
+
+th .arr:empty{
+  display:none;
+}
+
 .table-shell{
   margin:0 12px;
   border:1px solid var(--line-soft);
@@ -625,20 +691,24 @@ th{
   position:sticky;
   top:0;
   z-index:2;
+  padding-top:12px;
+  padding-bottom:12px;
+  vertical-align:bottom;
   background:rgba(247,247,247,.96);
   color:var(--muted);
   font-size:12px;
   font-weight:600;
   letter-spacing:.01em;
   cursor:pointer;
-  white-space:normal;
-  line-height:1.35;
+  white-space:nowrap;
+  line-height:1.3;
 }
 
 td{
   background:var(--canvas);
   font-size:13px;
   white-space:nowrap;
+  font-variant-numeric:tabular-nums;
 }
 
 th.l,td.l{text-align:left}
@@ -646,6 +716,32 @@ td.l{
   white-space:normal;
   word-break:break-word;
   line-height:1.4;
+}
+
+/* 公司欄：名稱靠左（過長截斷），代號與市場徽章靠右對齊成一直線、固定單行 */
+.company{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+
+.company .name{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.company .cmeta{
+  flex-shrink:0;
+  margin-left:auto;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+
+.company .cmeta .mk{
+  margin-left:0;
 }
 th:nth-child(1),
 td:nth-child(1){
@@ -659,19 +755,22 @@ td:nth-child(2){
   width:160px;
 }
 
-th:nth-child(3),
-td:nth-child(3){
-  width:108px;
-}
-
-th:nth-child(13),
-td:nth-child(13){
+th:nth-child(10),
+td:nth-child(10){
   width:76px;
 }
 
-th:nth-child(14),
-td:nth-child(14){
+th:nth-child(11),
+td:nth-child(11){
   width:86px;
+}
+
+/* 徽章欄（措辭、評級）置中，與填滿欄位的徽章對齊；數字欄維持靠右 */
+th:nth-child(10),
+td:nth-child(10),
+th:nth-child(11),
+td:nth-child(11){
+  text-align:center;
 }
 
 tbody tr:last-child td{border-bottom:0}
@@ -685,6 +784,13 @@ tr.focus.current td{background:#e8f0ff}
 .muted{color:var(--muted)}
 .pos{color:var(--good)}
 .neg{color:var(--bad)}
+
+.chg-sub{
+  display:block;
+  font-size:11px;
+  line-height:1.3;
+  font-weight:400;
+}
 
 .name{
   font-size:14px;
@@ -785,6 +891,7 @@ tr.focus.current td{background:#e8f0ff}
 .th-sub{
   font-size:10px;
   font-weight:500;
+  color:var(--muted-soft);
 }
 
 .note{
@@ -810,18 +917,10 @@ tr.focus.current td{background:#e8f0ff}
   z-index:20;
 }
 
-.ov.on{
-  opacity:1;
-  pointer-events:none;
-}
-
 .dr{
-  position:fixed;
+  position:sticky;
   top:24px;
-  right:24px;
-  bottom:24px;
-  width:clamp(340px,36vw,420px);
-  max-width:calc(100vw - 48px);
+  height:calc(100vh - 48px);
   display:grid;
   grid-template-rows:minmax(0,1fr);
   padding:0;
@@ -894,12 +993,20 @@ tr.focus.current td{background:#e8f0ff}
   display:flex;
   align-items:flex-start;
   justify-content:space-between;
-  gap:16px;
+  gap:12px;
   flex-wrap:wrap;
-  padding:24px 24px 0;
+  padding:20px 24px 0;
 }
 
 .drawer-head > :first-child{
+  flex:1 1 220px;
+  min-width:0;
+}
+
+.drawer-id{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
   flex:1 1 220px;
   min-width:0;
 }
@@ -910,7 +1017,19 @@ tr.focus.current td{background:#e8f0ff}
   font-size:12px;
 }
 
+.drawer-sub.drawer-kicker{
+  margin:0;
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--muted-soft);
+}
+
 .drawer-meta{
+  margin-top:0;
+  font-size:13px;
+  color:var(--muted);
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
@@ -938,8 +1057,9 @@ tr.focus.current td{background:#e8f0ff}
 .drawer-actions{
   display:flex;
   flex-wrap:wrap;
+  align-items:center;
   gap:10px;
-  padding:0 24px;
+  padding:14px 24px 0;
 }
 
 .drbtn{
@@ -952,10 +1072,27 @@ tr.focus.current td{background:#e8f0ff}
   background:var(--canvas);
 }
 
-.refreshstatus{
-  min-height:20px;
-  padding:0 24px 4px;
+.drbtn-refresh{
+  min-height:32px;
+  padding:0 14px;
   font-size:12px;
+  font-weight:600;
+  color:var(--body);
+}
+
+.refreshstatus{
+  min-height:0;
+  padding:0 24px;
+  font-size:12px;
+  line-height:1.5;
+}
+
+.refreshstatus.is-empty{
+  padding:0;
+}
+
+.refreshstatus:not(.is-empty){
+  padding:8px 24px 0;
 }
 
 .refreshstatus.ok{color:var(--good)}
@@ -972,9 +1109,9 @@ tr.focus.current td{background:#e8f0ff}
 }
 
 .drstat{
-  padding:14px 16px;
+  padding:14px 14px;
   border:1px solid var(--line-soft);
-  border-radius:18px;
+  border-radius:16px;
   background:var(--surface-soft);
 }
 
@@ -984,20 +1121,22 @@ tr.focus.current td{background:#e8f0ff}
 }
 
 .drstat .v{
-  margin-top:6px;
+  margin-top:5px;
   font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
-  font-size:19px;
+  font-size:21px;
   font-weight:500;
+  letter-spacing:-.01em;
+  line-height:1.1;
 }
 
 .drawer-section{
   display:grid;
-  gap:12px;
+  gap:10px;
 }
 
 .drawer-panel{
   display:none;
-  gap:22px;
+  gap:24px;
 }
 
 .drawer-panel.on{
@@ -1011,11 +1150,19 @@ tr.focus.current td{background:#e8f0ff}
   font-weight:600;
 }
 
+.sec-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
 .drawer-tabs{
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
   gap:8px;
-  padding:0 24px 18px;
+  padding:16px 24px 18px;
   border-bottom:1px solid var(--line-soft);
 }
 
@@ -1038,12 +1185,16 @@ tr.focus.current td{background:#e8f0ff}
 .drawer-scroll{
   min-height:0;
   overflow-y:auto;
-  padding:0 24px 24px;
+  padding:16px 24px 24px;
 }
 
 .overview-grid{
   display:grid;
-  gap:10px;
+  gap:0;
+  border:1px solid var(--line-soft);
+  border-radius:16px;
+  background:var(--surface-soft);
+  overflow:hidden;
 }
 
 .overview-item{
@@ -1051,17 +1202,31 @@ tr.focus.current td{background:#e8f0ff}
   align-items:center;
   justify-content:space-between;
   gap:12px;
-  padding:14px 16px;
-  border:1px solid var(--line-soft);
-  border-radius:18px;
-  background:var(--surface-soft);
+  padding:11px 16px;
+  border:0;
+  border-top:1px solid var(--line-soft);
+  border-radius:0;
+  background:transparent;
+  font-size:13px;
+}
+
+.overview-item:first-child{
+  border-top:0;
+}
+
+.overview-item > span{
+  color:var(--body);
+}
+
+.overview-item > div .muted{
+  color:var(--muted-soft);
 }
 
 .chartbox,
 .fintab-wrap{
-  padding:18px;
+  padding:16px;
   border:1px solid var(--line-soft);
-  border-radius:24px;
+  border-radius:20px;
   background:var(--surface-soft);
 }
 
@@ -1080,18 +1245,28 @@ tr.focus.current td{background:#e8f0ff}
 }
 
 .fintab td{
-  padding:12px 0;
+  padding:11px 0;
   font-size:13px;
   background:transparent;
+  border-bottom:1px solid var(--line-soft);
 }
 
 .fintab td:first-child{
   color:var(--body);
 }
 
+.fintab tr:last-child td{
+  border-bottom:0;
+}
+
+.fintab td:last-child{
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+
 .epstog{
   display:inline-flex;
-  margin-left:8px;
+  flex-shrink:0;
   border:1px solid var(--line);
   border-radius:999px;
   overflow:hidden;
@@ -1111,6 +1286,11 @@ tr.focus.current td{background:#e8f0ff}
 .epstog button.on{
   background:var(--ink);
   color:var(--canvas);
+}
+
+.epsyoy{
+  font-size:12px;
+  line-height:1.5;
 }
 
 .phrase-list{
@@ -1144,7 +1324,7 @@ tr.focus.current td{background:#e8f0ff}
 }
 
 textarea{
-  min-height:120px;
+  min-height:128px;
   resize:vertical;
 }
 
@@ -1157,7 +1337,7 @@ textarea{
 .links a{
   display:inline-flex;
   align-items:center;
-  min-height:36px;
+  min-height:40px;
   padding:0 14px;
   border:1px solid var(--line);
   border-radius:999px;
@@ -1173,9 +1353,16 @@ textarea{
   background:rgba(0,82,255,.05);
 }
 
-@media (max-width:1320px){
-  .filter-grid{
-    grid-template-columns:repeat(3,minmax(0,1fr));
+@media (min-width:721px){
+  th:nth-child(9),
+  td:nth-child(9){
+    width:84px;
+  }
+}
+
+@media (min-width:1181px) and (max-width:1366px){
+  .hideN{
+    display:none;
   }
 }
 
@@ -1184,11 +1371,8 @@ textarea{
     grid-template-columns:1fr;
   }
 
-  .hideT{
-    display:none;
-  }
-
   .dr{
+    position:fixed;
     display:none;
     top:0;
     right:0;
@@ -1211,6 +1395,7 @@ textarea{
   }
 
   .ov.on{
+    opacity:1;
     pointer-events:auto;
   }
 }
@@ -1230,7 +1415,41 @@ textarea{
 
   .hero{
     grid-template-columns:1fr;
-    padding:36px 0 28px;
+    padding:24px 0 20px;
+  }
+
+  .hero-toggle{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:44px;
+    padding:0 18px;
+    border:1px solid var(--line);
+    border-radius:var(--radius-pill);
+    background:var(--canvas);
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    justify-self:start;
+  }
+
+  .hero-toggle::after{
+    content:"▾";
+    margin-left:8px;
+  }
+
+  .hero.hero-expanded .hero-toggle::after{
+    content:"▴";
+  }
+
+  #heroPlaybook,
+  #heroSnapshot{
+    display:none;
+  }
+
+  .hero.hero-expanded #heroPlaybook,
+  .hero.hero-expanded #heroSnapshot{
+    display:grid;
   }
 
   .playbook,
@@ -1258,7 +1477,27 @@ textarea{
   }
 
   .filter-grid{
-    grid-template-columns:1fr;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .filter-grid .fld:nth-child(1){
+    grid-column:span 2;
+  }
+
+  .filter-grid .fld:nth-child(2),
+  .filter-grid .fld:nth-child(3),
+  .filter-grid .fld:nth-child(4),
+  .filter-grid .fld:nth-child(5),
+  .filter-grid .fld:nth-child(6){
+    grid-column:span 1;
+  }
+
+  .flag-group .chk{
+    grid-column:span 1;
+  }
+
+  .flag-group .chk:last-child{
+    grid-column:span 2;
   }
 
   .dr{
@@ -1300,14 +1539,53 @@ textarea{
     display:none;
   }
 
-  th:nth-child(2),
-  td:nth-child(2){
-    width:120px;
+  th,td{
+    padding:12px 6px;
   }
 
-  th:nth-child(14),
-  td:nth-child(14){
-    width:72px;
+  td{
+    font-size:12px;
+  }
+
+  .name{
+    font-size:13px;
+  }
+
+  /* 行動版欄位窄：公司名完整顯示，代號徽章可換到第二行（不右靠、不截斷） */
+  .company{
+    flex-wrap:wrap;
+    gap:2px 6px;
+  }
+
+  .company .name{
+    white-space:normal;
+    overflow:visible;
+  }
+
+  .company .cmeta{
+    margin-left:0;
+  }
+
+  th:nth-child(1),
+  td:nth-child(1){
+    width:32px;
+    padding-left:10px;
+    padding-right:6px;
+  }
+
+  th:nth-child(2),
+  td:nth-child(2){
+    width:106px;
+  }
+
+  th:nth-child(9),
+  td:nth-child(9){
+    width:auto;
+  }
+
+  th:nth-child(11),
+  td:nth-child(11){
+    width:60px;
   }
 
   .hideM{
@@ -1323,12 +1601,12 @@ textarea{
       <span class="brand-mark" aria-hidden="true"></span>
       <div>
         <div class="brand-name">台股篩選工具</div>
-        <div class="brand-sub">用量化初篩與質化追蹤，把研究名單整理成可持續更新的流程。</div>
+        <div class="brand-sub">找出營收、獲利在成長的台股，再幫你一檔一檔追蹤。</div>
       </div>
     </div>
     <div class="topbar-meta">
       <span class="topbar-chip" id="runtimeChip">載入中</span>
-      <span class="topbar-chip soft" id="heroCoverage">研究宇宙載入中</span>
+      <span class="topbar-chip soft" id="heroCoverage">股票清單載入中</span>
     </div>
   </header>
 
@@ -1337,50 +1615,52 @@ textarea{
     <section class="hero">
       <div class="hero-copy">
         <div>
-          <h2>用制度化研究流程，快速篩出台股業績動能股。</h2>
-          <p>以月營收 YoY、累計 YoY、毛利率與 EPS 建立第一層訊號，再把法說與財報中的景氣關鍵措辭納入第二層判讀。左側維持大樣本排序，右側保留逐檔研究面板，讓初篩與深挖在同一個工作區完成。</p>
+          <h2>找出營收、獲利在成長的台股</h2>
+          <p>設好月營收年增率、累計年增率、毛利率和 EPS 的門檻，符合的股票就列出來。點開任一檔，看它的營收走勢、損益表和 EPS 圖。</p>
         </div>
 
         <div class="hero-signals">
-          <span class="signal-chip">月營收與累計動能</span>
-          <span class="signal-chip">毛利率 / EPS 驗證</span>
-          <span class="signal-chip">7 大關鍵措辭勾選</span>
-          <span class="signal-chip">重點關注與觀察清單</span>
+          <span class="signal-chip">月營收成長</span>
+          <span class="signal-chip">毛利率 / EPS</span>
+          <span class="signal-chip">勾關鍵措辭</span>
+          <span class="signal-chip">加星追蹤</span>
         </div>
 
-        <div class="playbook">
+        <button type="button" class="hero-toggle" id="heroToggle" aria-expanded="false" aria-controls="heroPlaybook heroSnapshot">怎麼用、資料從哪來</button>
+
+        <div class="playbook" id="heroPlaybook">
           <article class="playbook-card">
             <span class="playbook-step">01</span>
-            <h2>財報檢視時點</h2>
-            <p>每年 1、4、7、10 月集中回看季報、公開說明書與法說，先釐清營運趨勢，再進入篩選。</p>
+            <h2>先看財報</h2>
+            <p>每年 1、4、7、10 月財報出來後，先翻一輪季報和法說，了解公司近況。</p>
           </article>
           <article class="playbook-card">
             <span class="playbook-step">02</span>
-            <h2>量化初篩</h2>
-            <p>系統依月營收 YoY、累計 YoY、毛利率與 EPS 找出基本面變化較明確的公司。</p>
+            <h2>設條件篩</h2>
+            <p>設好月營收年增率、累計年增率、毛利率和 EPS 的門檻，符合的股票就列出來。</p>
           </article>
           <article class="playbook-card">
             <span class="playbook-step">03</span>
-            <h2>質化訊號研判</h2>
-            <p>逐檔核對法說、財報與產業資料，確認是否出現供不應求、需求旺盛與新品擴張等訊號。</p>
+            <h2>點開細看</h2>
+            <p>點進單一檔看財報和圖，確認有沒有供不應求、需求旺盛、新品上市這類好消息。</p>
           </article>
           <article class="playbook-card">
             <span class="playbook-step">04</span>
-            <h2>建立研究名單</h2>
-            <p>當量化與質化條件同時成立時，列入優先研究。勾選紀錄、筆記與觀察清單都會保留在本機。</p>
+            <h2>勾選追蹤</h2>
+            <p>覺得不錯就勾關鍵措辭、加星、寫筆記，這些紀錄都存在你自己的瀏覽器裡。</p>
           </article>
         </div>
       </div>
 
-      <aside class="hero-card">
+      <aside class="hero-card" id="heroSnapshot">
         <div>
-          <h2>資料快照與覆蓋範圍</h2>
-          <p>目前以交易所、櫃買中心與 MOPS 快照組成研究宇宙，設計成能快速比較、排序並回到逐檔判讀的工作台。</p>
+          <h2>資料來源</h2>
+          <p>資料來自證交所、櫃買中心和公開資訊觀測站，每天更新一次。</p>
         </div>
 
         <div class="hero-meta">
           <div class="hero-meta-card">
-            <span>研究宇宙</span>
+            <span>全部股票</span>
             <strong id="statUniverse">-</strong>
           </div>
           <div class="hero-meta-card">
@@ -1416,22 +1696,22 @@ textarea{
       <article class="summary-card">
         <span>符合目前條件</span>
         <strong id="summaryMatches">-</strong>
-        <p>依目前搜尋、產業、門檻與市場條件計算。</p>
+        <p>依你現在設的搜尋、產業、門檻和市場條件算出來的。</p>
       </article>
       <article class="summary-card">
         <span>重點關注</span>
         <strong id="summaryFocus">-</strong>
-        <p>量化動能成立，且至少勾選一項關鍵措辭。</p>
+        <p>營收明顯在成長，而且你至少勾了一項關鍵措辭。</p>
       </article>
       <article class="summary-card">
         <span>觀察清單</span>
         <strong id="summaryWatch">-</strong>
-        <p>以星號加入本機追蹤名單，方便回頭複查。</p>
+        <p>按星號加進追蹤名單，方便之後回頭再看。</p>
       </article>
       <article class="summary-card">
         <span>目前檢視</span>
         <strong id="summaryView">全部</strong>
-        <p>可切換全部、重點關注與觀察清單三種工作模式。</p>
+        <p>可切換全部、重點關注、觀察清單三種看法。</p>
       </article>
     </section>
 
@@ -1441,7 +1721,7 @@ textarea{
           <div class="panel-head">
             <div>
               <h2>篩選條件</h2>
-              <p>保留寬鬆入口，再逐步收斂到值得深挖的名單。切換檢視模式時，左側表格會同步更新。</p>
+              <p>條件可以先設寬鬆一點，再慢慢縮小到想深入看的名單。</p>
             </div>
           </div>
 
@@ -1463,15 +1743,15 @@ textarea{
               <select id="ind"></select>
             </div>
             <div class="fld">
-              <label for="minYoy">最低月營收 YoY %</label>
-              <input type="number" id="minYoy" value="30" step="5">
+              <label for="minYoy">月營收 YoY%<span class="req">≥</span></label>
+              <input type="number" id="minYoy" value="30" step="5" placeholder="不限">
             </div>
             <div class="fld">
-              <label for="minYtd">最低累計 YoY %</label>
+              <label for="minYtd">累計 YoY%<span class="req">≥</span></label>
               <input type="number" id="minYtd" placeholder="不限">
             </div>
             <div class="fld">
-              <label for="minGm">最低毛利率 %</label>
+              <label for="minGm">毛利率%<span class="req">≥</span></label>
               <input type="number" id="minGm" placeholder="不限">
             </div>
             <div class="flag-group">
@@ -1481,7 +1761,7 @@ textarea{
           </div>
 
           <div class="filter-foot">
-            <div class="filter-note">預設先抓動能，再進右側研究面板確認財報與法說內容。</div>
+            <div class="filter-note">預設先抓營收在成長的，再點開右側面板看財報和法說。</div>
             <div class="views">
               <button type="button" class="viewbtn on" data-v="all">全部</button>
               <button type="button" class="viewbtn" data-v="focus">重點關注</button>
@@ -1494,7 +1774,7 @@ textarea{
           <div class="panel-head">
             <div>
               <h2>研究清單</h2>
-              <p>維持大樣本排序，點任一列就能把個股資料帶到右側，繼續深挖。</p>
+              <p>篩選結果都列在這裡，點任一檔就能在右側看它的詳細資料。</p>
             </div>
           </div>
 
@@ -1508,27 +1788,28 @@ textarea{
               <thead>
                 <tr>
                   <th></th>
-                  <th class="l" data-s="name">公司</th>
-                  <th class="l hideT hideM" data-s="ind">產業</th>
-                  <th data-s="yoy">月營收 YoY%</th>
-                  <th data-s="ytdYoy" class="hideM">累計 YoY%</th>
-                  <th data-s="gm" class="hideM">毛利率%</th>
-                  <th data-s="eps" class="hideS">EPS<br><span class="th-sub">季</span></th>
-                  <th data-s="epsYoY" class="hideS">單季 EPS<br>YoY%</th>
-                  <th data-s="pe" class="hideS">本益比</th>
-                  <th data-s="pb" class="hideT hideM">淨值比</th>
-                  <th data-s="price" class="hideS">股價</th>
-                  <th data-s="chg" class="hideT hideM">漲跌</th>
-                  <th data-s="ph" class="hideS">措辭</th>
-                  <th data-s="score">評級</th>
+                  <th class="l" data-s="name">公司<span class="arr" aria-hidden="true"></span></th>
+                  <th data-s="yoy">月營收<br><span class="th-sub">YoY%</span><span class="arr" aria-hidden="true"></span></th>
+                  <th data-s="ytdYoy" class="hideM">累計<br><span class="th-sub">YoY%</span><span class="arr" aria-hidden="true"></span></th>
+                  <th data-s="gm" class="hideM">毛利率<br><span class="th-sub">%</span><span class="arr" aria-hidden="true"></span></th>
+                  <th data-s="eps" class="hideS">EPS<br><span class="th-sub">季</span><span class="arr" aria-hidden="true"></span></th>
+                  <th data-s="epsYoY" class="hideS">單季EPS<br><span class="th-sub">YoY%</span><span class="arr" aria-hidden="true"></span></th>
+                  <th data-s="pe" class="hideS hideN">本益比<br><span class="th-sub">倍</span><span class="arr" aria-hidden="true"></span></th>
+                  <th data-s="price">股價<br><span class="th-sub">漲跌</span><span class="arr" aria-hidden="true"></span></th>
+                  <th data-s="ph" class="hideS">措辭<span class="arr" aria-hidden="true"></span></th>
+                  <th data-s="score">評級<span class="arr" aria-hidden="true"></span></th>
                 </tr>
               </thead>
               <tbody id="tb"></tbody>
             </table>
           </div>
+
+          <div class="table-tools table-tools-bottom">
+            <div class="pager" id="pagerBottom"></div>
+          </div>
         </section>
 
-        <div class="note">說明：月營收 YoY 是較即時的營運動能指標，但<b>建材營造、金融保險</b>等產業常受一次性認列影響，因此預設排除。點開任一檔後，可同步查看<b>季度損益表（<span id="noteIncLabel">-</span>）與近 12 個月營收走勢圖</b>。資料為快照，非即時報價，不構成投資建議。</div>
+        <div class="note">說明：月營收 YoY 反映營運的最新變化，但<b>建材營造、金融保險</b>等產業常受一次性認列影響，因此預設排除。點開任一檔後，可同步查看<b>季度損益表（<span id="noteIncLabel">-</span>）與近 12 個月營收走勢圖</b>。資料為快照，非即時報價，不構成投資建議。</div>
       </div>
 
       <aside class="dr" id="dr">
@@ -1540,8 +1821,8 @@ textarea{
 
         <div class="drawer-content">
           <div class="drawer-head">
-            <div>
-              <p class="drawer-sub">個股研究面板</p>
+            <div class="drawer-id">
+              <p class="drawer-sub drawer-kicker">個股研究面板</p>
               <h2 class="drawer-title" id="dName"></h2>
               <div class="muted drawer-meta" id="dMeta"></div>
             </div>
@@ -1549,9 +1830,9 @@ textarea{
           </div>
 
           <div class="drawer-actions">
-            <button type="button" class="drbtn ghost" id="dRefresh">更新個股資訊</button>
+            <button type="button" class="drbtn ghost drbtn-refresh" id="dRefresh">更新個股資訊</button>
           </div>
-          <div class="muted refreshstatus" id="dRefreshStatus"></div>
+          <div class="muted refreshstatus is-empty" id="dRefreshStatus"></div>
 
           <nav class="drawer-tabs" id="dTabs" aria-label="個股研究段落" role="tablist">
             <button type="button" class="drtab on" id="tab-overview" data-section="overview" aria-selected="true" aria-controls="panel-overview" tabindex="0" role="tab">總覽</button>
@@ -1576,7 +1857,8 @@ textarea{
               </section>
 
               <section class="drawer-section">
-                <div class="sec">EPS（元）與去年同期對比 <span class="epstog"><button type="button" id="emS" class="on">單季</button><button type="button" id="emC">累計</button></span><br><span id="dEpsYoY" class="muted"></span></div>
+                <div class="sec sec-row"><span>EPS（元）與去年同期對比</span><span class="epstog"><button type="button" id="emS" class="on">單季</button><button type="button" id="emC">累計</button></span></div>
+                <span id="dEpsYoY" class="muted epsyoy"></span>
                 <div class="chartbox compact"><canvas id="dEps"></canvas></div>
               </section>
             </section>

@@ -4,8 +4,16 @@ const html = readIndexHtml();
 
 const requiredMarkers = [
   {
-    label: "desktop floating width",
-    ok: /width:clamp\(340px,\s*36vw,\s*420px\)/.test(html),
+    label: "desktop two-column workspace",
+    ok: /\.workspace\{[^}]*grid-template-columns:minmax\(0,1fr\) clamp\(340px,28vw,420px\)/.test(
+      html,
+    ),
+  },
+  {
+    label: "desktop drawer is sticky beside the table",
+    ok: /\.dr\{[^}]*position:sticky;[^}]*top:24px;[^}]*height:calc\(100vh - 48px\);/.test(
+      html,
+    ),
   },
   {
     label: "drawer tabs",
@@ -40,12 +48,12 @@ const requiredMarkers = [
     ok: /grid-template-rows:auto auto auto auto minmax\(0,1fr\)/.test(html),
   },
   {
-    label: "desktop light overlay",
+    label: "overlay gradient for mobile slide-in",
     ok: /background:linear-gradient\(90deg,\s*rgba\(245,247,250,0\)/.test(html),
   },
   {
-    label: "desktop overlay stays visual-only",
-    ok: /\.ov\.on\{[\s\S]*?opacity:1;[\s\S]*?pointer-events:none;[\s\S]*?\}/.test(html),
+    label: "overlay inert by default",
+    ok: /\.ov\{[^}]*opacity:0;[^}]*pointer-events:none;[^}]*\}/.test(html),
   },
   {
     label: "desktop drawer shell visible by default",
@@ -55,13 +63,13 @@ const requiredMarkers = [
   },
   {
     label: "mobile drawer remains hidden until open",
-    ok: /@media \(max-width:1180px\)\{[\s\S]*?\.dr\{[\s\S]*?display:none;[\s\S]*?transform:translateX\(104%\);[\s\S]*?opacity:0;[\s\S]*?pointer-events:none;[\s\S]*?\}[\s\S]*?\.dr\.on\{[\s\S]*?display:grid;[\s\S]*?transform:translateX\(0\);[\s\S]*?opacity:1;[\s\S]*?pointer-events:auto;[\s\S]*?\}/.test(
+    ok: /@media \(max-width:1180px\)\{[\s\S]*?\.dr\{[\s\S]*?position:fixed;[\s\S]*?display:none;[\s\S]*?transform:translateX\(104%\);[\s\S]*?opacity:0;[\s\S]*?pointer-events:none;[\s\S]*?\}[\s\S]*?\.dr\.on\{[\s\S]*?display:grid;[\s\S]*?transform:translateX\(0\);[\s\S]*?opacity:1;[\s\S]*?pointer-events:auto;[\s\S]*?\}/.test(
       html,
     ),
   },
   {
     label: "mobile overlay still captures close taps",
-    ok: /@media \(max-width:1180px\)\{[\s\S]*?\.ov\.on\{[\s\S]*?pointer-events:auto;[\s\S]*?\}/.test(
+    ok: /@media \(max-width:1180px\)\{[\s\S]*?\.ov\.on\{[\s\S]*?opacity:1;[\s\S]*?pointer-events:auto;[\s\S]*?\}/.test(
       html,
     ),
   },

@@ -86,7 +86,7 @@ for (const header of dom.sortHeaders) {
   });
 }
 
-dom.pager.addEventListener("click", (event) => {
+function handlePagerClick(event) {
   const button = event.target.closest("button[data-page]");
   if (!button || button.disabled) return;
 
@@ -100,7 +100,16 @@ dom.pager.addEventListener("click", (event) => {
   }
 
   ui.render();
-});
+
+  if (event.currentTarget === dom.pagerBottom) {
+    dom.tb.closest(".table-panel")?.scrollIntoView({ block: "start" });
+  }
+}
+
+dom.pager.addEventListener("click", handlePagerClick);
+if (dom.pagerBottom) {
+  dom.pagerBottom.addEventListener("click", handlePagerClick);
+}
 
 dom.tb.addEventListener("click", (event) => {
   const star = event.target.closest("[data-star]");
@@ -124,6 +133,13 @@ dom.ov.addEventListener("click", () => {
 dom.close.addEventListener("click", () => {
   ui.closeDrawer();
 });
+
+if (dom.heroToggle && dom.hero) {
+  dom.heroToggle.addEventListener("click", () => {
+    const expanded = dom.hero.classList.toggle("hero-expanded");
+    dom.heroToggle.setAttribute("aria-expanded", String(expanded));
+  });
+}
 
 dom.dTabs.addEventListener("click", (event) => {
   const button = event.target.closest(".drtab[data-section]");
