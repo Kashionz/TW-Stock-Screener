@@ -51,7 +51,8 @@ body{
   font-family:"PingFang TC","Avenir Next","Helvetica Neue","Microsoft JhengHei",sans-serif;
   color:var(--ink);
   background:
-    linear-gradient(180deg,var(--canvas) 0 360px,var(--surface-soft) 360px 100%);
+    radial-gradient(1200px 380px at 50% -40px, rgba(0,82,255,.055) 0%, rgba(0,82,255,0) 72%),
+    linear-gradient(180deg,#ffffff 0%, #fbfcfe 24%, #f6f7f9 58%, #f3f4f6 100%);
   font-size:14px;
   line-height:1.5;
   overflow-x:hidden;
@@ -105,17 +106,13 @@ a{color:inherit}
   letter-spacing:-.03em;
 }
 
-.brand-sub{
-  color:var(--body);
-  font-size:12px;
-}
-
 .topbar-meta{
   display:flex;
   flex-wrap:wrap;
   gap:10px;
   align-items:center;
   justify-content:flex-end;
+  position:relative;
 }
 
 .topbar-chip{
@@ -144,19 +141,6 @@ a{color:inherit}
   background:var(--surface-soft);
 }
 
-.hero{
-  display:grid;
-  grid-template-columns:minmax(0,1.2fr) minmax(360px,.8fr);
-  gap:24px;
-  padding:32px 0 28px;
-}
-
-.hero-copy{
-  display:grid;
-  gap:18px;
-  align-content:start;
-}
-
 main > h1{
   position:absolute;
   width:1px;
@@ -169,110 +153,88 @@ main > h1{
   border:0;
 }
 
-.hero-copy h2{
-  margin:0;
-  max-width:16em;
-  font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
-  font-size:clamp(30px,3.2vw,46px);
-  font-weight:400;
-  line-height:1.1;
-  letter-spacing:-.05em;
+.source-popover{
+  position:relative;
 }
 
-.hero-copy p{
-  margin:0;
-  max-width:52rem;
-  color:var(--body);
-  font-size:16px;
+.source-trigger{
+  list-style:none;
+  cursor:pointer;
 }
 
-.hero-signals{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
+.sr-only{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0 0 0 0);
+  white-space:nowrap;
+  border:0;
 }
 
-.signal-chip{
-  display:inline-flex;
-  align-items:center;
-  min-height:38px;
-  padding:0 14px;
-  border:1px solid var(--line);
-  border-radius:var(--radius-pill);
-  background:var(--canvas);
-  color:var(--body);
-  font-size:13px;
-}
-
-.hero-toggle{
+.source-trigger::-webkit-details-marker{
   display:none;
 }
 
-.playbook{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:12px;
+.source-trigger.info{
+  gap:6px;
+  padding:0 12px;
 }
 
-.playbook-card{
-  min-height:100%;
-  padding:14px 16px;
-  border:1px solid rgba(222,225,230,.9);
-  border-radius:var(--radius-md);
-  background:rgba(255,255,255,.92);
-  box-shadow:var(--shadow-sm);
-}
-
-.playbook-step{
+.source-trigger.info::before{
+  content:"i";
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  min-width:44px;
-  min-height:26px;
-  margin-bottom:8px;
-  border-radius:var(--radius-pill);
+  width:16px;
+  height:16px;
+  border-radius:50%;
   background:var(--surface-strong);
-  color:var(--ink);
-  font-family:"SFMono-Regular","Menlo","Roboto Mono",monospace;
-  font-size:12px;
-  font-weight:500;
+  color:var(--primary);
+  font-size:11px;
+  font-weight:700;
 }
 
-.playbook-card h2{
-  margin:0 0 8px;
-  font-size:15px;
-  font-weight:600;
+.source-trigger.info::after{
+  content:"▾";
+  color:var(--muted);
+  font-size:11px;
 }
 
-.playbook-card p{
-  margin:0;
-  color:var(--body);
-  font-size:13px;
+.source-popover[open] .source-trigger.info::after{
+  content:"▴";
 }
 
-.hero-card{
+.source-popover-panel{
+  position:absolute;
+  top:calc(100% + 12px);
+  right:0;
+  z-index:30;
+  width:min(440px,calc(100vw - 48px));
+}
+
+.source-card{
   display:grid;
-  gap:14px;
+  gap:18px;
   min-height:100%;
+  width:100%;
   padding:22px;
+  border:1px solid rgba(222,225,230,.92);
   border-radius:30px;
-  background:var(--surface-dark);
-  color:var(--canvas);
-  box-shadow:var(--shadow-lg);
+  background:rgba(255,255,255,.92);
+  color:var(--ink);
+  box-shadow:var(--shadow-sm);
+  overflow:hidden;
 }
 
-.hero-card h2{
-  margin:0 0 10px;
+.source-card h2{
+  margin:0;
   font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
   font-size:22px;
   font-weight:500;
   letter-spacing:-.03em;
-}
-
-.hero-card p{
-  margin:0;
-  color:rgba(255,255,255,.7);
-  font-size:14px;
 }
 
 .hero-meta{
@@ -283,14 +245,14 @@ main > h1{
 
 .hero-meta-card{
   padding:12px 14px;
-  border:1px solid rgba(255,255,255,.1);
+  border:1px solid rgba(222,225,230,.9);
   border-radius:18px;
-  background:rgba(255,255,255,.04);
+  background:linear-gradient(180deg,#ffffff 0%,#f7f8fa 100%);
 }
 
 .hero-meta-card span{
   display:block;
-  color:rgba(255,255,255,.62);
+  color:var(--muted);
   font-size:12px;
 }
 
@@ -305,10 +267,10 @@ main > h1{
 
 .period-list{
   display:grid;
-  gap:8px;
-  padding:12px 0;
-  border-top:1px solid rgba(255,255,255,.1);
-  border-bottom:1px solid rgba(255,255,255,.1);
+  gap:10px;
+  padding:14px 0;
+  border-top:1px solid var(--line-soft);
+  border-bottom:1px solid var(--line-soft);
 }
 
 .period-row{
@@ -319,7 +281,7 @@ main > h1{
 }
 
 .period-row span{
-  color:rgba(255,255,255,.62);
+  color:var(--muted);
   font-size:13px;
 }
 
@@ -327,19 +289,42 @@ main > h1{
   font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
   font-size:16px;
   font-weight:500;
+  text-align:right;
 }
 
-.snapshot-meta{
-  color:rgba(255,255,255,.62);
+.source-list{
+  display:grid;
+  gap:12px;
+  margin:0;
+}
+
+.source-row{
+  display:grid;
+  grid-template-columns:72px minmax(0,1fr);
+  gap:12px;
+  margin:0;
+}
+
+.source-row dt{
+  margin:0;
+  color:var(--muted);
   font-size:12px;
-  line-height:1.7;
+  font-weight:600;
+  letter-spacing:.01em;
+}
+
+.source-row dd{
+  margin:0;
+  color:var(--ink);
+  font-size:13px;
+  line-height:1.65;
 }
 
 .summary-grid{
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
   gap:14px;
-  margin-bottom:22px;
+  margin:22px 0;
 }
 
 .summary-card{
@@ -358,17 +343,11 @@ main > h1{
 
 .summary-card strong{
   display:block;
-  margin:10px 0 6px;
+  margin:10px 0 0;
   font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
   font-size:32px;
   font-weight:500;
   letter-spacing:-.04em;
-}
-
-.summary-card p{
-  margin:0;
-  color:var(--body);
-  font-size:12px;
 }
 
 .workspace{
@@ -405,17 +384,11 @@ main > h1{
 }
 
 .panel-head h2{
-  margin:0 0 6px;
+  margin:0;
   font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
   font-size:28px;
   font-weight:500;
   letter-spacing:-.03em;
-}
-
-.panel-head p{
-  margin:0;
-  color:var(--body);
-  font-size:13px;
 }
 
 /* 篩選面板專屬：標題齊左對齊輸入框、收斂 hero 級距與留白（不影響研究清單） */
@@ -427,11 +400,7 @@ main > h1{
 .filter-panel .panel-head h2{
   font-size:20px;
   letter-spacing:-.01em;
-  margin:0 0 4px;
-}
-
-.filter-panel .panel-head p{
-  line-height:1.4;
+  margin:0;
 }
 
 .filter-panel{
@@ -545,11 +514,6 @@ textarea:focus{
   justify-content:space-between;
   gap:14px;
   margin-top:18px;
-}
-
-.filter-note{
-  color:var(--body);
-  font-size:12px;
 }
 
 .views{
@@ -1264,6 +1228,12 @@ tr.focus.current td{background:#e8f0ff}
   font-variant-numeric:tabular-nums;
 }
 
+.fintab td.financial-empty{
+  padding:18px 0;
+  text-align:center;
+  font-variant-numeric:normal;
+}
+
 .epstog{
   display:inline-flex;
   flex-shrink:0;
@@ -1413,48 +1383,12 @@ textarea{
     padding:16px 0;
   }
 
-  .hero{
-    grid-template-columns:1fr;
-    padding:24px 0 20px;
+  .topbar-meta{
+    width:100%;
+    justify-content:flex-start;
   }
 
-  .hero-toggle{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    min-height:44px;
-    padding:0 18px;
-    border:1px solid var(--line);
-    border-radius:var(--radius-pill);
-    background:var(--canvas);
-    font-size:14px;
-    font-weight:600;
-    cursor:pointer;
-    justify-self:start;
-  }
-
-  .hero-toggle::after{
-    content:"▾";
-    margin-left:8px;
-  }
-
-  .hero.hero-expanded .hero-toggle::after{
-    content:"▴";
-  }
-
-  #heroPlaybook,
-  #heroSnapshot{
-    display:none;
-  }
-
-  .hero.hero-expanded #heroPlaybook,
-  .hero.hero-expanded #heroSnapshot{
-    display:grid;
-  }
-
-  .playbook,
-  .summary-grid,
-  .hero-meta{
+  .summary-grid{
     grid-template-columns:1fr;
   }
 
@@ -1472,8 +1406,19 @@ textarea{
 }
 
 @media (max-width:720px){
-  .hero-copy h2{
-    max-width:none;
+  .source-popover-panel{
+    left:0;
+    right:auto;
+    width:min(100vw - 32px,440px);
+  }
+
+  .hero-meta{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+
+  .source-row{
+    grid-template-columns:1fr;
+    gap:4px;
   }
 
   .filter-grid{
@@ -1601,117 +1546,92 @@ textarea{
       <span class="brand-mark" aria-hidden="true"></span>
       <div>
         <div class="brand-name">台股篩選工具</div>
-        <div class="brand-sub">找出營收、獲利在成長的台股，再幫你一檔一檔追蹤。</div>
       </div>
     </div>
     <div class="topbar-meta">
-      <span class="topbar-chip" id="runtimeChip">載入中</span>
-      <span class="topbar-chip soft" id="heroCoverage">股票清單載入中</span>
+      <span class="topbar-chip soft" id="lastUpdatedChip">最後更新載入中</span>
+      <details class="source-popover">
+        <summary class="topbar-chip soft source-trigger info" id="sourceInfoToggle" aria-label="資料來源" title="資料來源">
+          <span class="sr-only">資料來源</span>
+        </summary>
+        <div class="source-popover-panel">
+          <section class="source-card" id="sourceInfoPanel">
+            <div>
+              <h2>資料來源</h2>
+            </div>
+
+            <div class="hero-meta">
+              <div class="hero-meta-card">
+                <span>全部股票</span>
+                <strong id="statUniverse">-</strong>
+              </div>
+              <div class="hero-meta-card">
+                <span>上市</span>
+                <strong id="statListed">-</strong>
+              </div>
+              <div class="hero-meta-card">
+                <span>上櫃</span>
+                <strong id="statOtc">-</strong>
+              </div>
+            </div>
+
+            <div class="period-list">
+              <div class="period-row">
+                <span>月營收</span>
+                <strong id="statRevenuePeriod">-</strong>
+              </div>
+              <div class="period-row">
+                <span>損益表</span>
+                <strong id="statIncomePeriod">-</strong>
+              </div>
+              <div class="period-row">
+                <span>估值 / 股價</span>
+                <strong id="statValuationDate">-</strong>
+              </div>
+            </div>
+
+            <dl class="source-list" aria-label="資料來源明細">
+              <div class="source-row">
+                <dt>更新模式</dt>
+                <dd id="runtimeChip">載入中</dd>
+              </div>
+              <div class="source-row">
+                <dt>更新頻率</dt>
+                <dd id="sourceFrequency">每天更新一次</dd>
+              </div>
+              <div class="source-row">
+                <dt>資料來源</dt>
+                <dd id="sourceOrigin">證交所、櫃買中心、公開資訊觀測站</dd>
+              </div>
+              <div class="source-row">
+                <dt>涵蓋範圍</dt>
+                <dd id="sourceCoverage">資料快照載入中</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
+      </details>
     </div>
   </header>
 
   <main>
     <h1>台股篩選工具</h1>
-    <section class="hero">
-      <div class="hero-copy">
-        <div>
-          <h2>找出營收、獲利在成長的台股</h2>
-          <p>設好月營收年增率、累計年增率、毛利率和 EPS 的門檻，符合的股票就列出來。點開任一檔，看它的營收走勢、損益表和 EPS 圖。</p>
-        </div>
-
-        <div class="hero-signals">
-          <span class="signal-chip">月營收成長</span>
-          <span class="signal-chip">毛利率 / EPS</span>
-          <span class="signal-chip">勾關鍵措辭</span>
-          <span class="signal-chip">加星追蹤</span>
-        </div>
-
-        <button type="button" class="hero-toggle" id="heroToggle" aria-expanded="false" aria-controls="heroPlaybook heroSnapshot">怎麼用、資料從哪來</button>
-
-        <div class="playbook" id="heroPlaybook">
-          <article class="playbook-card">
-            <span class="playbook-step">01</span>
-            <h2>先看財報</h2>
-            <p>每年 1、4、7、10 月財報出來後，先翻一輪季報和法說，了解公司近況。</p>
-          </article>
-          <article class="playbook-card">
-            <span class="playbook-step">02</span>
-            <h2>設條件篩</h2>
-            <p>設好月營收年增率、累計年增率、毛利率和 EPS 的門檻，符合的股票就列出來。</p>
-          </article>
-          <article class="playbook-card">
-            <span class="playbook-step">03</span>
-            <h2>點開細看</h2>
-            <p>點進單一檔看財報和圖，確認有沒有供不應求、需求旺盛、新品上市這類好消息。</p>
-          </article>
-          <article class="playbook-card">
-            <span class="playbook-step">04</span>
-            <h2>勾選追蹤</h2>
-            <p>覺得不錯就勾關鍵措辭、加星、寫筆記，這些紀錄都存在你自己的瀏覽器裡。</p>
-          </article>
-        </div>
-      </div>
-
-      <aside class="hero-card" id="heroSnapshot">
-        <div>
-          <h2>資料來源</h2>
-          <p>資料來自證交所、櫃買中心和公開資訊觀測站，每天更新一次。</p>
-        </div>
-
-        <div class="hero-meta">
-          <div class="hero-meta-card">
-            <span>全部股票</span>
-            <strong id="statUniverse">-</strong>
-          </div>
-          <div class="hero-meta-card">
-            <span>上市</span>
-            <strong id="statListed">-</strong>
-          </div>
-          <div class="hero-meta-card">
-            <span>上櫃</span>
-            <strong id="statOtc">-</strong>
-          </div>
-        </div>
-
-        <div class="period-list">
-          <div class="period-row">
-            <span>月營收</span>
-            <strong id="statRevenuePeriod">-</strong>
-          </div>
-          <div class="period-row">
-            <span>損益表</span>
-            <strong id="statIncomePeriod">-</strong>
-          </div>
-          <div class="period-row">
-            <span>估值 / 股價</span>
-            <strong id="statValuationDate">-</strong>
-          </div>
-        </div>
-
-        <p class="snapshot-meta" id="snapshotMeta">資料快照載入中</p>
-      </aside>
-    </section>
-
     <section class="summary-grid">
+      <article class="summary-card">
+        <span>全部股票</span>
+        <strong id="summaryUniverse">-</strong>
+      </article>
       <article class="summary-card">
         <span>符合目前條件</span>
         <strong id="summaryMatches">-</strong>
-        <p>依你現在設的搜尋、產業、門檻和市場條件算出來的。</p>
       </article>
       <article class="summary-card">
         <span>重點關注</span>
         <strong id="summaryFocus">-</strong>
-        <p>營收明顯在成長，而且你至少勾了一項關鍵措辭。</p>
       </article>
       <article class="summary-card">
         <span>觀察清單</span>
         <strong id="summaryWatch">-</strong>
-        <p>按星號加進追蹤名單，方便之後回頭再看。</p>
-      </article>
-      <article class="summary-card">
-        <span>目前檢視</span>
-        <strong id="summaryView">全部</strong>
-        <p>可切換全部、重點關注、觀察清單三種看法。</p>
       </article>
     </section>
 
@@ -1721,7 +1641,6 @@ textarea{
           <div class="panel-head">
             <div>
               <h2>篩選條件</h2>
-              <p>條件可以先設寬鬆一點，再慢慢縮小到想深入看的名單。</p>
             </div>
           </div>
 
@@ -1761,7 +1680,6 @@ textarea{
           </div>
 
           <div class="filter-foot">
-            <div class="filter-note">預設先抓營收在成長的，再點開右側面板看財報和法說。</div>
             <div class="views">
               <button type="button" class="viewbtn on" data-v="all">全部</button>
               <button type="button" class="viewbtn" data-v="focus">重點關注</button>
@@ -1774,7 +1692,6 @@ textarea{
           <div class="panel-head">
             <div>
               <h2>研究清單</h2>
-              <p>篩選結果都列在這裡，點任一檔就能在右側看它的詳細資料。</p>
             </div>
           </div>
 
@@ -1816,7 +1733,7 @@ textarea{
         <div class="drawer-empty">
           <span class="drawer-empty-mark" aria-hidden="true"></span>
           <h2>選一檔展開研究面板</h2>
-          <p>從研究清單挑選公司後，這裡會顯示摘要、圖表、財報與你的研究筆記。桌機會用浮動側邊面板深讀，行動裝置則維持右側抽屜。</p>
+          <p>從研究清單挑選公司後，這裡會顯示摘要、圖表、財報。</p>
         </div>
 
         <div class="drawer-content">

@@ -5,16 +5,21 @@ const source = readFrontendSource();
 
 const requiredMarkers = [
   {
-    label: "hero toggle markup",
+    label: "topbar source info trigger",
     ok:
-      html.includes('id="heroToggle"') &&
-      html.includes('aria-controls="heroPlaybook heroSnapshot"'),
+      html.includes('id="sourceInfoToggle"') &&
+      html.includes('class="source-popover"') &&
+      html.includes('id="lastUpdatedChip"') &&
+      !html.includes('id="heroSnapshot"'),
   },
   {
-    label: "hero collapse wiring",
+    label: "structured source details",
     ok:
-      source.includes('classList.toggle("hero-expanded")') &&
-      /\.hero\.hero-expanded #heroPlaybook/.test(html),
+      html.includes('id="sourceFrequency"') &&
+      html.includes('id="sourceOrigin"') &&
+      html.includes('id="sourceCoverage"') &&
+      html.includes('class="source-list"') &&
+      !html.includes('id="snapshotMeta"'),
   },
   {
     label: "merged price column header",

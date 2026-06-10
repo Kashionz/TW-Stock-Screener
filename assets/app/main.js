@@ -134,13 +134,6 @@ dom.close.addEventListener("click", () => {
   ui.closeDrawer();
 });
 
-if (dom.heroToggle && dom.hero) {
-  dom.heroToggle.addEventListener("click", () => {
-    const expanded = dom.hero.classList.toggle("hero-expanded");
-    dom.heroToggle.setAttribute("aria-expanded", String(expanded));
-  });
-}
-
 dom.dTabs.addEventListener("click", (event) => {
   const button = event.target.closest(".drtab[data-section]");
   if (!button || !state.currentCode) return;

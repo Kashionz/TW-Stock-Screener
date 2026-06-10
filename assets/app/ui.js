@@ -21,14 +21,15 @@ import {
   revLabel,
   rocDateLabel,
   signedFmt,
-  snapshotHeader,
+  snapshotCoverageLabel,
+  snapshotUpdatedLabel,
   ymLabel,
 } from "./helpers.js";
 
-function buildFinancialTable(row) {
+export function buildFinancialTable(row) {
   const financials = row.fin;
   if (!financials) {
-    return '<tr><td class="muted" colspan="2">此檔（多為金融/特殊業）損益表欄位不適用</td></tr>';
+    return '<tr><td class="muted financial-empty" colspan="2">此檔（多為金融/特殊業）損益表欄位不適用</td></tr>';
   }
 
   const rows = [
@@ -77,11 +78,13 @@ const SORT_LABELS = {
   price: "股價",
 };
 
-const VIEW_LABELS = {
-  all: "全部",
-  focus: "重點關注",
-  star: "觀察清單",
-};
+export function buildPagerWindow(currentPage, totalPages, maxVisible = 3) {
+  const visible = Math.max(1, Math.min(maxVisible, totalPages));
+  const start = Math.max(1, Math.min(currentPage - Math.floor(visible / 2), totalPages - visible + 1));
+  const end = start + visible - 1;
+
+  return Array.from({ length: visible }, (_, index) => start + index).filter((page) => page <= end);
+}
 
 export function getQuickStats(row) {
   return [
@@ -157,20 +160,20 @@ export function collectDom(documentRoot = document) {
     pagerBottom: documentRoot.getElementById("pagerBottom"),
     tb: documentRoot.getElementById("tb"),
     runtimeChip: documentRoot.getElementById("runtimeChip"),
-    heroCoverage: documentRoot.getElementById("heroCoverage"),
-    hero: documentRoot.querySelector(".hero"),
-    heroToggle: documentRoot.getElementById("heroToggle"),
+    lastUpdatedChip: documentRoot.getElementById("lastUpdatedChip"),
     statUniverse: documentRoot.getElementById("statUniverse"),
     statListed: documentRoot.getElementById("statListed"),
     statOtc: documentRoot.getElementById("statOtc"),
     statRevenuePeriod: documentRoot.getElementById("statRevenuePeriod"),
     statIncomePeriod: documentRoot.getElementById("statIncomePeriod"),
     statValuationDate: documentRoot.getElementById("statValuationDate"),
+    summaryUniverse: documentRoot.getElementById("summaryUniverse"),
     summaryMatches: documentRoot.getElementById("summaryMatches"),
     summaryFocus: documentRoot.getElementById("summaryFocus"),
     summaryWatch: documentRoot.getElementById("summaryWatch"),
-    summaryView: documentRoot.getElementById("summaryView"),
-    snapshotMeta: documentRoot.getElementById("snapshotMeta"),
+    sourceFrequency: documentRoot.getElementById("sourceFrequency"),
+    sourceOrigin: documentRoot.getElementById("sourceOrigin"),
+    sourceCoverage: documentRoot.getElementById("sourceCoverage"),
     noteIncLabel: documentRoot.getElementById("noteIncLabel"),
     ov: documentRoot.getElementById("ov"),
     dr: documentRoot.getElementById("dr"),
@@ -233,17 +236,20 @@ export function createAppUi({ state, dom, runtime }) {
 
   function syncSnapshotMeta() {
     const { meta } = state.snapshot;
+    const updatedLabel = snapshotUpdatedLabel(state.snapshot);
 
-    dom.snapshotMeta.textContent = snapshotHeader(meta);
     dom.noteIncLabel.textContent = state.incLabel;
-    dom.runtimeChip.textContent = runtime && runtime.hasLiveApi ? "本機更新模式" : "靜態快照模式";
-    dom.heroCoverage.textContent = `${meta.count.toLocaleString()} 檔股票`;
+    dom.runtimeChip.textContent = runtime && runtime.hasLiveApi ? "本機更新" : "靜態快照";
+    dom.lastUpdatedChip.textContent = updatedLabel ? `最後更新 ${updatedLabel}` : "最後更新載入中";
     dom.statUniverse.textContent = meta.count.toLocaleString();
     dom.statListed.textContent = meta.tw.toLocaleString();
     dom.statOtc.textContent = meta.otc.toLocaleString();
     dom.statRevenuePeriod.textContent = revLabel(meta.revPeriodROC);
     dom.statIncomePeriod.textContent = state.incLabel;
     dom.statValuationDate.textContent = rocDateLabel(meta.valDateROC);
+    dom.sourceFrequency.textContent = "每天更新一次";
+    dom.sourceOrigin.textContent = "證交所、櫃買中心、公開資訊觀測站";
+    dom.sourceCoverage.textContent = snapshotCoverageLabel(meta);
   }
 
   function setRefreshStatus(message, tone = "") {
@@ -299,11 +305,10 @@ export function createAppUi({ state, dom, runtime }) {
       return;
     }
 
-    const startPage = Math.max(1, state.page - 2);
-    const endPage = Math.min(pages, state.page + 2);
+    const pageWindow = buildPagerWindow(state.page, pages);
     const parts = [];
 
-    for (let page = startPage; page <= endPage; page += 1) {
+    for (const page of pageWindow) {
       parts.push(
         `<button class="${page === state.page ? "on" : ""}" data-page="${page}">${page}</button>`,
       );
@@ -357,11 +362,11 @@ export function createAppUi({ state, dom, runtime }) {
       (filteredRows.length ? `｜顯示第 ${start + 1}-${end} 檔` : "") +
       `｜依 ${SORT_LABELS[state.sortKey] || state.sortKey} 排序`;
 
+    dom.summaryUniverse.textContent = state.rows.length.toLocaleString();
     dom.summaryMatches.textContent = filteredRows.length.toLocaleString();
     dom.summaryFocus.textContent =
       state.view === "focus" ? filteredRows.length.toLocaleString() : filteredFocus.toLocaleString();
     dom.summaryWatch.textContent = totalWatch.toLocaleString();
-    dom.summaryView.textContent = VIEW_LABELS[state.view] || VIEW_LABELS.all;
 
     renderPager(filteredRows.length);
     renderSortIndicators();
