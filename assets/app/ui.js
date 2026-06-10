@@ -1,4 +1,5 @@
 import {
+  DEFAULT_DRAWER_SECTION,
   PAGE_SIZE,
   PHRASES,
   clearCurrentRow,
@@ -8,6 +9,7 @@ import {
   getSurgeLevel,
   isFocus,
   setCurrentCode,
+  setDrawerSection,
 } from "./state.js";
 import {
   displayQuarterEps,
@@ -16,6 +18,8 @@ import {
   fmt,
   formatChange,
   pct,
+  revLabel,
+  rocDateLabel,
   signedFmt,
   snapshotHeader,
   ymLabel,
@@ -60,6 +64,87 @@ function buildReferenceLinks(code, rocYear) {
   );
 }
 
+const SORT_LABELS = {
+  score: "評級",
+  ph: "措辭數",
+  name: "公司代號",
+  ind: "產業",
+  yoy: "月營收 YoY",
+  ytdYoy: "累計 YoY",
+  gm: "毛利率",
+  eps: "EPS",
+  epsYoY: "單季 EPS YoY",
+  pe: "本益比",
+  pb: "淨值比",
+  price: "股價",
+  chg: "漲跌",
+};
+
+const VIEW_LABELS = {
+  all: "全部",
+  focus: "重點關注",
+  star: "觀察清單",
+};
+
+export function getQuickStats(row) {
+  return [
+    ["月營收YoY", pct(row.yoy)],
+    ["累計YoY", pct(row.ytdYoy)],
+    ["毛利率", signedFmt(row.gm, 1, "%")],
+    ["EPS(季)", signedFmt(displayQuarterEps(row), 2)],
+  ];
+}
+
+function getOverviewItems(row) {
+  return [
+    ["月增MoM", pct(row.mom)],
+    ["股價", fmt(row.price, 2)],
+    ["本益比", fmt(row.pe, 1)],
+    ["淨值比", fmt(row.pb, 2)],
+    ["殖利率", row.yield == null ? '<span class="muted">—</span>' : `${fmt(row.yield, 2)}%`],
+  ];
+}
+
+export function summarizeDrawerNote(note, maxLength = 30) {
+  const compact = String(note || "")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!compact) return "";
+  if (compact.length <= maxLength) return compact;
+  return `${compact.slice(0, maxLength - 1)}…`;
+}
+
+export function buildDrawerMeta(row, note) {
+  const parts = [];
+
+  if (row?.ind) parts.push(row.ind);
+
+  const noteSummary = summarizeDrawerNote(note);
+  if (noteSummary) parts.push(noteSummary);
+
+  return parts.join(" ｜ ");
+}
+
+export function applyDrawerSectionUi(dom, section) {
+  for (const button of dom.dTabButtons) {
+    const active = button.dataset.section === section;
+    button.classList.toggle("on", active);
+    button.setAttribute("aria-selected", String(active));
+    button.setAttribute("tabindex", active ? "0" : "-1");
+  }
+
+  for (const panel of dom.dPanels) {
+    const active = panel.dataset.panel === section;
+    panel.classList.toggle("on", active);
+    panel.hidden = !active;
+  }
+}
+
+export function resetDrawerScrollPosition(dom) {
+  if (!dom?.drawerScroll) return;
+  dom.drawerScroll.scrollTop = 0;
+}
+
 export function collectDom(documentRoot = document) {
   return {
     q: documentRoot.getElementById("q"),
@@ -73,6 +158,18 @@ export function collectDom(documentRoot = document) {
     count: documentRoot.getElementById("count"),
     pager: documentRoot.getElementById("pager"),
     tb: documentRoot.getElementById("tb"),
+    runtimeChip: documentRoot.getElementById("runtimeChip"),
+    heroCoverage: documentRoot.getElementById("heroCoverage"),
+    statUniverse: documentRoot.getElementById("statUniverse"),
+    statListed: documentRoot.getElementById("statListed"),
+    statOtc: documentRoot.getElementById("statOtc"),
+    statRevenuePeriod: documentRoot.getElementById("statRevenuePeriod"),
+    statIncomePeriod: documentRoot.getElementById("statIncomePeriod"),
+    statValuationDate: documentRoot.getElementById("statValuationDate"),
+    summaryMatches: documentRoot.getElementById("summaryMatches"),
+    summaryFocus: documentRoot.getElementById("summaryFocus"),
+    summaryWatch: documentRoot.getElementById("summaryWatch"),
+    summaryView: documentRoot.getElementById("summaryView"),
     snapshotMeta: documentRoot.getElementById("snapshotMeta"),
     noteIncLabel: documentRoot.getElementById("noteIncLabel"),
     ov: documentRoot.getElementById("ov"),
@@ -82,6 +179,9 @@ export function collectDom(documentRoot = document) {
     dMeta: documentRoot.getElementById("dMeta"),
     dRefresh: documentRoot.getElementById("dRefresh"),
     dRefreshStatus: documentRoot.getElementById("dRefreshStatus"),
+    dTabs: documentRoot.getElementById("dTabs"),
+    drawerScroll: documentRoot.querySelector(".drawer-scroll"),
+    dOverview: documentRoot.getElementById("dOverview"),
     dStats: documentRoot.getElementById("dStats"),
     dChart: documentRoot.getElementById("dChart"),
     emS: documentRoot.getElementById("emS"),
@@ -93,6 +193,8 @@ export function collectDom(documentRoot = document) {
     dPhrases: documentRoot.getElementById("dPhrases"),
     dNote: documentRoot.getElementById("dNote"),
     dLinks: documentRoot.getElementById("dLinks"),
+    dTabButtons: [...documentRoot.querySelectorAll(".drtab[data-section]")],
+    dPanels: [...documentRoot.querySelectorAll(".drawer-panel[data-panel]")],
     viewButtons: [...documentRoot.querySelectorAll(".viewbtn")],
     sortHeaders: [...documentRoot.querySelectorAll('th[data-s]')],
   };
@@ -130,8 +232,18 @@ export function createAppUi({ state, dom, runtime }) {
   }
 
   function syncSnapshotMeta() {
-    dom.snapshotMeta.textContent = snapshotHeader(state.snapshot.meta);
+    const { meta } = state.snapshot;
+
+    dom.snapshotMeta.textContent = snapshotHeader(meta);
     dom.noteIncLabel.textContent = state.incLabel;
+    dom.runtimeChip.textContent = runtime && runtime.hasLiveApi ? "本機更新模式" : "靜態快照模式";
+    dom.heroCoverage.textContent = `${meta.count.toLocaleString()} 檔研究宇宙`;
+    dom.statUniverse.textContent = meta.count.toLocaleString();
+    dom.statListed.textContent = meta.tw.toLocaleString();
+    dom.statOtc.textContent = meta.otc.toLocaleString();
+    dom.statRevenuePeriod.textContent = revLabel(meta.revPeriodROC);
+    dom.statIncomePeriod.textContent = state.incLabel;
+    dom.statValuationDate.textContent = rocDateLabel(meta.valDateROC);
   }
 
   function setRefreshStatus(message, tone = "") {
@@ -194,16 +306,20 @@ export function createAppUi({ state, dom, runtime }) {
     }
 
     dom.pager.innerHTML =
-      `<button data-page="prev" ${state.page === 1 ? "disabled" : ""}>上一頁</button>` +
       `<span class="pagerstat">第 ${state.page} / ${pages} 頁</span>` +
+      `<div class="pagernav">` +
+      `<button data-page="prev" ${state.page === 1 ? "disabled" : ""}>上一頁</button>` +
       parts.join("") +
-      `<button data-page="next" ${state.page === pages ? "disabled" : ""}>下一頁</button>`;
+      `<button data-page="next" ${state.page === pages ? "disabled" : ""}>下一頁</button>` +
+      "</div>";
   }
 
   function render() {
     const filteredRows = getFilteredRows(state, readFilters());
     const pages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
     state.page = Math.min(state.page, pages);
+    const totalWatch = state.rows.filter((row) => getRecordState(state, row.code).star).length;
+    const filteredFocus = filteredRows.filter((row) => isFocus(state, row)).length;
 
     const start = (state.page - 1) * PAGE_SIZE;
     const end = Math.min(filteredRows.length, start + PAGE_SIZE);
@@ -215,7 +331,14 @@ export function createAppUi({ state, dom, runtime }) {
         : state.view === "star"
           ? "（觀察清單）"
           : "") +
-      (filteredRows.length ? `｜顯示第 ${start + 1}-${end} 檔` : "");
+      (filteredRows.length ? `｜顯示第 ${start + 1}-${end} 檔` : "") +
+      `｜依 ${SORT_LABELS[state.sortKey] || state.sortKey} 排序`;
+
+    dom.summaryMatches.textContent = filteredRows.length.toLocaleString();
+    dom.summaryFocus.textContent =
+      state.view === "focus" ? filteredRows.length.toLocaleString() : filteredFocus.toLocaleString();
+    dom.summaryWatch.textContent = totalWatch.toLocaleString();
+    dom.summaryView.textContent = VIEW_LABELS[state.view] || VIEW_LABELS.all;
 
     renderPager(filteredRows.length);
 
@@ -241,14 +364,14 @@ export function createAppUi({ state, dom, runtime }) {
             : '<span class="mk mkS">市</span>';
 
         return (
-          `<tr class="row${focus ? " focus" : ""}" data-c="${code}">` +
+          `<tr class="row${focus ? " focus" : ""}${state.currentCode === code ? " current" : ""}" data-c="${code}">` +
           `<td><span class="star${getRecordState(state, code).star ? " on" : ""}" data-star="${code}">★</span></td>` +
           `<td class="l"><span class="name">${escapeHtml(row.name)}</span> <span class="code">${code}</span>${marketBadge}</td>` +
-          `<td class="l hideM"><span class="muted">${escapeHtml(row.ind)}</span></td>` +
+          `<td class="l hideT hideM"><span class="muted">${escapeHtml(row.ind)}</span></td>` +
           `<td>${pct(row.yoy)}</td><td class="hideM">${pct(row.ytdYoy)}</td><td class="hideM">${signedFmt(row.gm, 1)}</td>` +
-          `<td>${signedFmt(row.eps, 2)}</td><td>${pct(row.epsYoY)}</td><td>${fmt(row.pe, 1)}</td><td class="hideM">${fmt(row.pb, 2)}</td>` +
-          `<td>${fmt(row.price, 2)}</td><td class="hideM">${formatChange(row)}</td>` +
-          `<td><span class="badge ${phraseBadgeClass}">${phraseCount}/7</span></td><td>${rating}</td>` +
+          `<td class="hideS">${signedFmt(row.eps, 2)}</td><td class="hideS">${pct(row.epsYoY)}</td><td class="hideS">${fmt(row.pe, 1)}</td><td class="hideT hideM">${fmt(row.pb, 2)}</td>` +
+          `<td class="hideS">${fmt(row.price, 2)}</td><td class="hideT hideM">${formatChange(row)}</td>` +
+          `<td class="hideS"><span class="badge ${phraseBadgeClass}">${phraseCount}/7</span></td><td>${rating}</td>` +
           "</tr>"
         );
       })
@@ -413,9 +536,37 @@ export function createAppUi({ state, dom, runtime }) {
     clearCanvas(dom.dEps, "此檔無EPS資料");
   }
 
-  function openDrawer(code) {
+  function renderDrawerSection() {
+    applyDrawerSectionUi(dom, state.drawerSection);
+
+    if (!state.currentRow) return;
+
+    if (state.drawerSection === "charts") {
+      renderRevenueChart(state.currentRow);
+      renderEps();
+      return;
+    }
+
+    destroyCharts();
+  }
+
+  function renderDrawerMeta(note) {
+    dom.dMeta.textContent = state.currentRow ? buildDrawerMeta(state.currentRow, note) : "";
+  }
+
+  function setActiveDrawerSection(section) {
+    setDrawerSection(state, section);
+    resetDrawerScrollPosition(dom);
+    renderDrawerSection();
+  }
+
+  function openDrawer(code, { resetSection = true } = {}) {
     const row = setCurrentCode(state, code);
     if (!row) return;
+
+    if (resetSection) {
+      setDrawerSection(state, DEFAULT_DRAWER_SECTION);
+    }
 
     const entry = getRecordState(state, code);
     const rocYear = Number(state.snapshot.meta.incQuarter?.[0] || "115") || 115;
@@ -423,7 +574,7 @@ export function createAppUi({ state, dom, runtime }) {
     dom.dName.innerHTML =
       `${escapeHtml(row.name)} <span class="code">${code}</span> <span class="mk ${row.mkt === "上櫃" ? 'mkO">櫃' : 'mkS">市'}</span> ` +
       (entry.star ? '<span class="star on">★</span>' : "");
-    dom.dMeta.textContent = row.ind + (row.note ? ` ｜ 備註:${row.note}` : "");
+    renderDrawerMeta(entry.note);
     setRefreshStatus(
       runtime && !runtime.hasLiveApi
         ? "目前是靜態檔模式；若要測試更新個股資訊，請改用 npm run dev 或 npm run dev:vercel。"
@@ -433,22 +584,16 @@ export function createAppUi({ state, dom, runtime }) {
     );
     updateRefreshControls();
 
-    const stats = [
-      ["月營收YoY", pct(row.yoy)],
-      ["累計YoY", pct(row.ytdYoy)],
-      ["月增MoM", pct(row.mom)],
-      ["毛利率", signedFmt(row.gm, 1, "%")],
-      ["EPS(季)", signedFmt(displayQuarterEps(row), 2)],
-      ["股價", fmt(row.price, 2)],
-      ["本益比", fmt(row.pe, 1)],
-      ["淨值比", fmt(row.pb, 2)],
-      ["殖利率", `${fmt(row.yield, 2)}%`],
-    ];
-
-    dom.dStats.innerHTML = stats
+    dom.dStats.innerHTML = getQuickStats(row)
       .map(
         ([label, value]) =>
           `<div class="drstat"><div class="k">${label}</div><div class="v">${value}</div></div>`,
+      )
+      .join("");
+    dom.dOverview.innerHTML = getOverviewItems(row)
+      .map(
+        ([label, value]) =>
+          `<div class="overview-item"><span class="muted">${label}</span><div>${value}</div></div>`,
       )
       .join("");
 
@@ -461,17 +606,20 @@ export function createAppUi({ state, dom, runtime }) {
     dom.dNote.value = entry.note || "";
     dom.dLinks.innerHTML = buildReferenceLinks(code, rocYear);
 
-    renderRevenueChart(row);
-    renderEps();
     dom.ov.classList.add("on");
-    dom.dr.classList.add("on");
+    dom.dr.classList.add("on", "has-selection");
+    resetDrawerScrollPosition(dom);
+    renderDrawerSection();
+    render();
   }
 
   function resetDrawer({ renderList = false } = {}) {
     destroyCharts();
     dom.ov.classList.remove("on");
-    dom.dr.classList.remove("on");
+    dom.dr.classList.remove("on", "has-selection");
     clearCurrentRow(state);
+    applyDrawerSectionUi(dom, DEFAULT_DRAWER_SECTION);
+    resetDrawerScrollPosition(dom);
     if (renderList) {
       render();
     }
@@ -489,7 +637,9 @@ export function createAppUi({ state, dom, runtime }) {
     renderEps,
     renderIndustryOptions,
     resetDrawer,
+    setDrawerSection: setActiveDrawerSection,
     setRefreshStatus,
+    updateDrawerMeta: renderDrawerMeta,
     syncSnapshotMeta,
     updateRefreshControls,
   };

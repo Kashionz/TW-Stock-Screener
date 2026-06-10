@@ -8,129 +8,1613 @@
   "mcpServerNames": []
 }
 </script>
-<html lang="zh-Hant"><head><meta charset="UTF-8">
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>台股篩選工具</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%230052ff'/%3E%3Ccircle cx='16' cy='16' r='7.5' fill='white'/%3E%3C/svg%3E">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
 <style>
-:root{color-scheme:light;--bg:#f6f7f9;--card:#fff;--ink:#1a2230;--sub:#6b7686;--line:#e6e9ef;
- --accent:#c0392b;--accent2:#1f6feb;--good:#137a4b;--bad:#c0392b;--gold:#e0a400;--hi:#fff7e6;--focus:#eafaf1;}
+:root{
+  color-scheme:light;
+  --canvas:#ffffff;
+  --surface-soft:#f7f7f7;
+  --surface-strong:#eef0f3;
+  --surface-card:#ffffff;
+  --surface-dark:#0a0b0d;
+  --surface-dark-elevated:#16181c;
+  --ink:#0a0b0d;
+  --body:#5b616e;
+  --muted:#7c828a;
+  --muted-soft:#a8acb3;
+  --line:#dee1e6;
+  --line-soft:#eef0f3;
+  --primary:#0052ff;
+  --primary-active:#003ecc;
+  --good:#05b169;
+  --bad:#cf202f;
+  --accent-yellow:#f4b000;
+  --shadow-sm:0 18px 42px rgba(10,11,13,.04);
+  --shadow-lg:0 24px 60px rgba(10,11,13,.08);
+  --radius-sm:12px;
+  --radius-md:18px;
+  --radius-lg:24px;
+  --radius-pill:999px;
+  --page-width:1480px;
+}
+
 *{box-sizing:border-box}
-body{margin:0;font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink);font-size:13px;line-height:1.45}
-.wrap{max-width:1300px;margin:0 auto;padding:16px}
-h1{font-size:20px;margin:0 0 2px}
-.muted{color:var(--sub);font-size:12px}
-.method{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:12px 0}
-.method b{color:var(--accent)}.method .step{margin:3px 0}
-.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-.tag{background:#fdecea;color:var(--accent);border:1px solid #f3c9c3;border-radius:20px;padding:2px 9px;font-size:11.5px}
-.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px}
-.fld{display:flex;flex-direction:column;gap:3px}.fld label{font-size:11px;color:var(--sub)}
-.fld input[type=text],.fld input[type=number],.fld select{padding:6px 8px;border:1px solid var(--line);border-radius:7px;font-size:13px;background:#fff;min-width:90px}
-.fld input[type=text]{min-width:150px}
-.chk{display:flex;align-items:center;gap:5px;font-size:12px;padding-bottom:6px;cursor:pointer;user-select:none}
-.views{display:flex;gap:6px;margin-left:auto;padding-bottom:4px}
-.viewbtn{padding:6px 12px;border:1px solid var(--line);background:#fff;border-radius:7px;cursor:pointer;font-size:12.5px}
-.viewbtn.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.tablemeta{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:0 0 8px 2px}
-.count{font-size:12px;color:var(--sub)}
-.pager{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:flex-end}
-.pager button{padding:5px 10px;border:1px solid var(--line);background:#fff;border-radius:7px;cursor:pointer;font-size:12px;color:var(--ink)}
-.pager button.on{background:var(--ink);border-color:var(--ink);color:#fff}
-.pager button:disabled{cursor:default;opacity:.45}
-.pagerstat{font-size:11.5px;color:var(--sub);margin-right:2px}
-table{width:100%;border-collapse:collapse;background:var(--card);border-radius:10px;overflow:hidden;border:1px solid var(--line)}
-th,td{padding:7px 9px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
-th{background:#f0f2f6;font-size:11.5px;color:var(--sub);cursor:pointer;position:sticky;top:0;z-index:2}
+html,body{min-height:100%}
+body{
+  margin:0;
+  font-family:"PingFang TC","Avenir Next","Helvetica Neue","Microsoft JhengHei",sans-serif;
+  color:var(--ink);
+  background:
+    linear-gradient(180deg,var(--canvas) 0 360px,var(--surface-soft) 360px 100%);
+  font-size:14px;
+  line-height:1.5;
+  overflow-x:hidden;
+}
+button,input,select,textarea{font:inherit}
+button{font-family:"PingFang TC","Avenir Next","Helvetica Neue","Microsoft JhengHei",sans-serif}
+a{color:inherit}
+
+.site-shell{
+  max-width:var(--page-width);
+  margin:0 auto;
+  padding:0 24px 40px;
+}
+
+.topbar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  min-height:76px;
+  border-bottom:1px solid rgba(222,225,230,.85);
+}
+
+.brand-lockup{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.brand-mark{
+  position:relative;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:var(--primary);
+  box-shadow:0 0 0 8px rgba(0,82,255,.08);
+}
+
+.brand-mark::after{
+  content:"";
+  position:absolute;
+  inset:4px;
+  border-radius:50%;
+  background:var(--canvas);
+}
+
+.brand-name{
+  font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
+  font-size:18px;
+  font-weight:700;
+  letter-spacing:-.03em;
+}
+
+.brand-sub{
+  color:var(--body);
+  font-size:12px;
+}
+
+.topbar-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+  justify-content:flex-end;
+}
+
+.topbar-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  min-height:38px;
+  padding:0 16px;
+  border-radius:var(--radius-pill);
+  border:1px solid var(--line);
+  background:var(--canvas);
+  color:var(--ink);
+  font-size:13px;
+  font-weight:500;
+}
+
+.topbar-chip::before{
+  content:"";
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  background:var(--primary);
+}
+
+.topbar-chip.soft{
+  background:var(--surface-soft);
+}
+
+.hero{
+  display:grid;
+  grid-template-columns:minmax(0,1.2fr) minmax(360px,.8fr);
+  gap:28px;
+  padding:52px 0 40px;
+}
+
+.hero-copy{
+  display:grid;
+  gap:24px;
+  align-content:start;
+}
+
+main > h1{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0 0 0 0);
+  white-space:nowrap;
+  border:0;
+}
+
+.hero-copy h2{
+  margin:0;
+  max-width:10.5em;
+  font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
+  font-size:clamp(40px,5vw,72px);
+  font-weight:400;
+  line-height:1.02;
+  letter-spacing:-.05em;
+}
+
+.hero-copy p{
+  margin:0;
+  max-width:52rem;
+  color:var(--body);
+  font-size:16px;
+}
+
+.hero-signals{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.signal-chip{
+  display:inline-flex;
+  align-items:center;
+  min-height:38px;
+  padding:0 14px;
+  border:1px solid var(--line);
+  border-radius:var(--radius-pill);
+  background:var(--canvas);
+  color:var(--body);
+  font-size:13px;
+}
+
+.playbook{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:16px;
+}
+
+.playbook-card{
+  min-height:100%;
+  padding:18px 20px;
+  border:1px solid rgba(222,225,230,.9);
+  border-radius:var(--radius-md);
+  background:rgba(255,255,255,.92);
+  box-shadow:var(--shadow-sm);
+}
+
+.playbook-step{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:44px;
+  min-height:26px;
+  margin-bottom:12px;
+  border-radius:var(--radius-pill);
+  background:var(--surface-strong);
+  color:var(--ink);
+  font-family:"SFMono-Regular","Menlo","Roboto Mono",monospace;
+  font-size:12px;
+  font-weight:500;
+}
+
+.playbook-card h2{
+  margin:0 0 8px;
+  font-size:17px;
+  font-weight:600;
+}
+
+.playbook-card p{
+  margin:0;
+  color:var(--body);
+  font-size:13px;
+}
+
+.hero-card{
+  display:grid;
+  gap:20px;
+  min-height:100%;
+  padding:28px;
+  border-radius:30px;
+  background:var(--surface-dark);
+  color:var(--canvas);
+  box-shadow:var(--shadow-lg);
+}
+
+.hero-card h2{
+  margin:0 0 10px;
+  font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
+  font-size:28px;
+  font-weight:500;
+  letter-spacing:-.03em;
+}
+
+.hero-card p{
+  margin:0;
+  color:rgba(255,255,255,.7);
+  font-size:14px;
+}
+
+.hero-meta{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+
+.hero-meta-card{
+  padding:16px 18px;
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:18px;
+  background:rgba(255,255,255,.04);
+}
+
+.hero-meta-card span{
+  display:block;
+  color:rgba(255,255,255,.62);
+  font-size:12px;
+}
+
+.hero-meta-card strong{
+  display:block;
+  margin-top:8px;
+  font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
+  font-size:26px;
+  font-weight:500;
+  letter-spacing:-.04em;
+}
+
+.period-list{
+  display:grid;
+  gap:12px;
+  padding:18px 0;
+  border-top:1px solid rgba(255,255,255,.1);
+  border-bottom:1px solid rgba(255,255,255,.1);
+}
+
+.period-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+}
+
+.period-row span{
+  color:rgba(255,255,255,.62);
+  font-size:13px;
+}
+
+.period-row strong{
+  font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
+  font-size:16px;
+  font-weight:500;
+}
+
+.snapshot-meta{
+  color:rgba(255,255,255,.62);
+  font-size:12px;
+  line-height:1.7;
+}
+
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+  margin-bottom:22px;
+}
+
+.summary-card{
+  padding:20px 22px;
+  border:1px solid rgba(222,225,230,.92);
+  border-radius:var(--radius-md);
+  background:rgba(255,255,255,.92);
+  box-shadow:var(--shadow-sm);
+}
+
+.summary-card span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.summary-card strong{
+  display:block;
+  margin:10px 0 6px;
+  font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
+  font-size:32px;
+  font-weight:500;
+  letter-spacing:-.04em;
+}
+
+.summary-card p{
+  margin:0;
+  color:var(--body);
+  font-size:12px;
+}
+
+.workspace{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:22px;
+  align-items:start;
+}
+
+.workspace > *,
+.main-stack,
+.panel{
+  min-width:0;
+}
+
+.main-stack{
+  display:grid;
+  gap:18px;
+}
+
+.panel{
+  border:1px solid rgba(222,225,230,.95);
+  border-radius:var(--radius-lg);
+  background:var(--surface-card);
+  box-shadow:var(--shadow-sm);
+}
+
+.panel-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+  padding:24px 24px 0;
+}
+
+.panel-head h2{
+  margin:0 0 6px;
+  font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
+  font-size:28px;
+  font-weight:500;
+  letter-spacing:-.03em;
+}
+
+.panel-head p{
+  margin:0;
+  color:var(--body);
+  font-size:13px;
+}
+
+.filter-panel{
+  padding:24px;
+  background:
+    linear-gradient(180deg,rgba(247,247,247,.98),rgba(255,255,255,.98));
+}
+
+.filter-grid{
+  display:grid;
+  grid-template-columns:2.2fr repeat(5,minmax(0,1fr)) 1.15fr;
+  gap:12px;
+  align-items:end;
+}
+
+.fld{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.fld label{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.fld input[type=text],
+.fld input[type=number],
+.fld select,
+textarea{
+  width:100%;
+  min-height:48px;
+  padding:12px 14px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--canvas);
+  color:var(--ink);
+  font-size:14px;
+  transition:border-color .2s ease, box-shadow .2s ease;
+}
+
+.fld input[type=text]:focus,
+.fld input[type=number]:focus,
+.fld select:focus,
+textarea:focus{
+  outline:none;
+  border-color:rgba(0,82,255,.5);
+  box-shadow:0 0 0 4px rgba(0,82,255,.08);
+}
+
+.flag-group{
+  display:grid;
+  gap:10px;
+}
+
+.chk{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-height:48px;
+  padding:0 14px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--canvas);
+  color:var(--body);
+  font-size:13px;
+  cursor:pointer;
+}
+
+.chk input{
+  width:16px;
+  height:16px;
+  accent-color:var(--primary);
+}
+
+.filter-foot{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  margin-top:18px;
+}
+
+.filter-note{
+  color:var(--body);
+  font-size:12px;
+}
+
+.views{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.viewbtn,
+.pager button,
+.drbtn,
+.close{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:44px;
+  padding:0 18px;
+  border-radius:var(--radius-pill);
+  border:1px solid var(--line);
+  background:var(--canvas);
+  color:var(--ink);
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease;
+}
+
+.viewbtn:hover,
+.pager button:hover,
+.drbtn:hover,
+.close:hover{
+  border-color:rgba(10,11,13,.2);
+  transform:translateY(-1px);
+}
+
+.viewbtn.on{
+  border-color:var(--primary);
+  background:var(--primary);
+  color:var(--canvas);
+}
+
+.table-panel{
+  padding-bottom:18px;
+}
+
+.table-tools{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:16px 24px 18px;
+}
+
+.count{
+  color:var(--body);
+  font-size:13px;
+}
+
+.pager{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+}
+
+.pagernav{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:8px;
+}
+
+.pager button{
+  min-height:40px;
+  padding:0 14px;
+  font-size:13px;
+  font-weight:500;
+}
+
+.pager button.on{
+  border-color:var(--ink);
+  background:var(--ink);
+  color:var(--canvas);
+}
+
+.pager button:disabled,
+.drbtn:disabled{
+  opacity:.45;
+  cursor:default;
+  transform:none;
+}
+
+.pagerstat{
+  color:var(--muted);
+  font-size:12px;
+  white-space:nowrap;
+}
+
+.table-shell{
+  margin:0 12px;
+  border:1px solid var(--line-soft);
+  border-radius:22px;
+  overflow:hidden;
+  background:var(--canvas);
+}
+
+table{
+  width:100%;
+  min-width:0;
+  table-layout:fixed;
+  border-collapse:separate;
+  border-spacing:0;
+}
+
+th,td{
+  padding:14px 10px;
+  text-align:right;
+  border-bottom:1px solid var(--line-soft);
+}
+
+th{
+  position:sticky;
+  top:0;
+  z-index:2;
+  background:rgba(247,247,247,.96);
+  color:var(--muted);
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:.01em;
+  cursor:pointer;
+  white-space:normal;
+  line-height:1.35;
+}
+
+td{
+  background:var(--canvas);
+  font-size:13px;
+  white-space:nowrap;
+}
+
 th.l,td.l{text-align:left}
-tr.row{cursor:pointer}tr.row:hover{background:#f4f8ff}
-tr.focus td{background:var(--focus)}tr.focus:hover td{background:#dff4e8}
-.pos{color:var(--good)}.neg{color:var(--bad)}
-.star{cursor:pointer;font-size:15px;color:#cfd6e0}.star.on{color:var(--gold)}
-.name{font-weight:600}.code{color:var(--sub);font-size:11px}
-.mk{display:inline-block;font-size:9.5px;border-radius:4px;padding:0 4px;margin-left:3px;vertical-align:middle}
-.mkS{background:#e7f0ff;color:#1f6feb}.mkO{background:#fff0e6;color:#c2680f}
-.badge{display:inline-block;min-width:30px;text-align:center;border-radius:6px;padding:1px 6px;font-size:11px;font-weight:600}
-.b0{background:#eef0f3;color:#9aa3b0}.b1{background:#fff2cc;color:#9a7700}.b2{background:#ffe0b3;color:#a85b00}.b3{background:#d7f0df;color:#137a4b}
-.flag{display:inline-block;background:var(--accent);color:#fff;border-radius:6px;padding:1px 6px;font-size:10.5px;font-weight:600}
-.surge{display:inline-block;border-radius:6px;padding:1px 6px;font-size:10.5px;font-weight:600}
-.surgeH{background:#fde2dd;color:#c0392b}.surgeM{background:#fff2cc;color:#9a7700}
-.ov{position:fixed;inset:0;background:rgba(20,25,35,.4);display:none;z-index:10}.ov.on{display:block}
-.dr{position:fixed;top:0;right:0;height:100%;width:440px;max-width:94vw;background:#fff;z-index:20;box-shadow:-4px 0 24px rgba(0,0,0,.15);padding:18px;overflow-y:auto;transform:translateX(100%);transition:.2s}
-.dr.on{transform:none}.dr h2{margin:0 0 2px;font-size:18px}
-.drstats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:12px 0}
-.drstat{background:var(--bg);border-radius:8px;padding:8px 10px}.drstat .k{font-size:10.5px;color:var(--sub)}.drstat .v{font-size:15px;font-weight:600}
-.sec{font-size:12px;color:var(--sub);margin:14px 0 6px;font-weight:600}
-.chartbox{background:var(--bg);border-radius:8px;padding:10px 8px 4px;height:180px;position:relative}
-.fintab{width:100%;border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.fintab td{padding:5px 9px;font-size:12px;border-bottom:1px solid var(--line)}
-.fintab tr:last-child td{border-bottom:0}
-.fintab td:first-child{text-align:left;color:var(--sub)}
-.epstog{display:inline-flex;margin-left:6px;vertical-align:middle}.epstog button{font:inherit;font-size:11px;border:1px solid var(--line);background:#fff;color:var(--sub);padding:1px 8px;cursor:pointer}.epstog button:first-child{border-radius:6px 0 0 6px}.epstog button:last-child{border-radius:0 6px 6px 0;border-left:0}.epstog button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
-.ph{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;cursor:pointer}
-.ph input{width:16px;height:16px}.ph.on{background:var(--hi);border-color:#f0d499}
-textarea,.dr input.lk{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit;font-size:13px}
-textarea{min-height:64px;resize:vertical}
-.links a{display:inline-block;margin:4px 8px 0 0;color:var(--accent2);text-decoration:none;font-size:12px;border:1px solid var(--line);padding:3px 8px;border-radius:6px}
-.close{position:absolute;top:14px;right:16px;cursor:pointer;font-size:20px;color:var(--sub)}
-.dractions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px}
-.drbtn{padding:7px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);font:inherit;font-size:12.5px;cursor:pointer}
-.drbtn.ghost{background:transparent;border-color:var(--line);color:var(--sub);font-size:12px;padding:5px 10px}
-.drbtn:disabled{cursor:default;opacity:.55}
-.refreshstatus{min-height:18px;margin-bottom:4px}
+td.l{
+  white-space:normal;
+  word-break:break-word;
+  line-height:1.4;
+}
+th:nth-child(1),
+td:nth-child(1){
+  width:42px;
+  padding-left:14px;
+  padding-right:8px;
+}
+
+th:nth-child(2),
+td:nth-child(2){
+  width:160px;
+}
+
+th:nth-child(3),
+td:nth-child(3){
+  width:108px;
+}
+
+th:nth-child(13),
+td:nth-child(13){
+  width:76px;
+}
+
+th:nth-child(14),
+td:nth-child(14){
+  width:86px;
+}
+
+tbody tr:last-child td{border-bottom:0}
+tr.row{cursor:pointer}
+tr.row:hover td{background:#f8faff}
+tr.focus td{background:#f8fbff}
+tr.current td{background:#eef4ff}
+tr.current:hover td{background:#e7f0ff}
+tr.focus.current td{background:#e8f0ff}
+
+.muted{color:var(--muted)}
+.pos{color:var(--good)}
+.neg{color:var(--bad)}
+
+.name{
+  font-size:14px;
+  font-weight:700;
+}
+
+.code{
+  color:var(--muted);
+  font-family:"SFMono-Regular","Menlo","Roboto Mono",monospace;
+  font-size:12px;
+}
+
+.mk{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:28px;
+  min-height:20px;
+  margin-left:8px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:600;
+}
+
+.mkS{
+  background:rgba(0,82,255,.09);
+  color:var(--primary);
+}
+
+.mkO{
+  background:rgba(244,176,0,.14);
+  color:#9f6a00;
+}
+
+.star{
+  color:#c4c9d1;
+  font-size:16px;
+  line-height:1;
+  cursor:pointer;
+  transition:color .18s ease;
+}
+
+.star.on{color:var(--accent-yellow)}
+
+.badge,
+.flag,
+.surge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:28px;
+  padding:0 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+}
+
+.badge{
+  min-width:56px;
+  border:1px solid transparent;
+}
+
+.b0{
+  background:#f2f4f7;
+  color:var(--muted);
+}
+
+.b1{
+  background:rgba(244,176,0,.12);
+  color:#8d6500;
+}
+
+.b2{
+  background:rgba(0,82,255,.1);
+  color:var(--primary);
+}
+
+.b3{
+  background:rgba(5,177,105,.12);
+  color:var(--good);
+}
+
+.flag{
+  background:var(--primary);
+  color:var(--canvas);
+}
+
+.surgeH{
+  background:rgba(207,32,47,.12);
+  color:var(--bad);
+}
+
+.surgeM{
+  background:rgba(244,176,0,.12);
+  color:#8d6500;
+}
+
+.th-sub{
+  font-size:10px;
+  font-weight:500;
+}
+
+.note{
+  margin-top:18px;
+  padding:0 4px;
+  color:var(--body);
+  font-size:12px;
+  line-height:1.8;
+}
+
+.note b{
+  color:var(--ink);
+}
+
+.ov{
+  position:fixed;
+  inset:0;
+  background:linear-gradient(90deg, rgba(245,247,250,0) 0%, rgba(245,247,250,.22) 42%, rgba(236,240,246,.74) 100%);
+  backdrop-filter:blur(2px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .22s ease;
+  z-index:20;
+}
+
+.ov.on{
+  opacity:1;
+  pointer-events:none;
+}
+
+.dr{
+  position:fixed;
+  top:24px;
+  right:24px;
+  bottom:24px;
+  width:clamp(340px,36vw,420px);
+  max-width:calc(100vw - 48px);
+  display:grid;
+  grid-template-rows:minmax(0,1fr);
+  padding:0;
+  overflow:hidden;
+  border:1px solid rgba(222,225,230,.95);
+  border-radius:32px;
+  background:rgba(255,255,255,.98);
+  box-shadow:var(--shadow-lg);
+  transform:translateX(0);
+  opacity:1;
+  pointer-events:auto;
+  transition:transform .22s ease, opacity .22s ease;
+  z-index:24;
+}
+
+.dr.on{
+  transform:translateX(0);
+  opacity:1;
+  pointer-events:auto;
+}
+
+.drawer-empty{
+  display:grid;
+  gap:16px;
+  align-content:start;
+  padding:24px;
+}
+
+.drawer-empty-mark{
+  width:56px;
+  height:56px;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 34% 34%,rgba(255,255,255,.2) 0 18%,transparent 18%),
+    linear-gradient(135deg,var(--primary),#4f8bff);
+  box-shadow:0 18px 36px rgba(0,82,255,.16);
+}
+
+.drawer-empty h2,
+.drawer-title{
+  margin:0;
+  font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
+  font-size:28px;
+  font-weight:500;
+  letter-spacing:-.03em;
+}
+
+.drawer-empty p{
+  margin:0;
+  color:var(--body);
+  font-size:14px;
+}
+
+.drawer-content{
+  display:none;
+  grid-template-rows:auto auto auto auto minmax(0,1fr);
+  min-height:0;
+  height:100%;
+}
+
+.dr.has-selection .drawer-empty{
+  display:none;
+}
+
+.dr.has-selection .drawer-content{
+  display:grid;
+}
+
+.drawer-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+  padding:24px 24px 0;
+}
+
+.drawer-head > :first-child{
+  flex:1 1 220px;
+  min-width:0;
+}
+
+.drawer-sub{
+  margin:0 0 12px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.drawer-meta{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.close{
+  min-height:40px;
+  min-width:72px;
+  padding:0 18px;
+  background:var(--surface-soft);
+  color:var(--body);
+  white-space:nowrap;
+  flex-shrink:0;
+}
+
+.close,
+.dr:not(.has-selection) .close{
+  display:none;
+}
+
+.dr.has-selection .close{
+  display:inline-flex;
+}
+
+.drawer-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  padding:0 24px;
+}
+
+.drbtn{
+  background:var(--surface-soft);
+  font-size:13px;
+  font-weight:600;
+}
+
+.drbtn.ghost{
+  background:var(--canvas);
+}
+
+.refreshstatus{
+  min-height:20px;
+  padding:0 24px 4px;
+  font-size:12px;
+}
+
 .refreshstatus.ok{color:var(--good)}
 .refreshstatus.err{color:var(--bad)}
-.note{font-size:11px;color:var(--sub);margin-top:18px;border-top:1px solid var(--line);padding-top:10px}
-@media(max-width:720px){.dr{width:100%}.hideM{display:none}.tablemeta{align-items:flex-start;flex-direction:column}.pager{justify-content:flex-start}}
-</style></head><body>
-<div class="wrap">
- <h1>台股篩選工具</h1>
- <div class="muted" id="snapshotMeta">資料快照：月營收 2026年4月 ｜ 損益表 2026 Q1 ｜ 估值/股價 2026/06/05 ｜ 來源：證交所 + 櫃買中心開放資料、月營收史 MOPS（上市 1070 ＋ 上櫃 884 ＝ 1954 檔）</div>
- <div class="method">
-  <div class="step"><b>① 財報檢視時點：</b>每年 1、4、7、10 月。優先檢視營運動能明顯改善公司的財報、公開說明書與法說資料。</div>
-  <div class="step"><b>② 量化初篩（系統自動執行）：</b>依月營收 YoY、累計 YoY、毛利率與 EPS 等指標，篩選基本面變化較明確之個股。</div>
-  <div class="step"><b>③ 質化訊號研判（逐檔確認）：</b>若財報、法說或產業調研明確提及下列營運或景氣訊號，可納入進一步研究：</div>
-  <div class="tags"><span class="tag">產品供不應求</span><span class="tag">行業高景氣度上行</span><span class="tag">市場超預期拓展</span><span class="tag">新品上市持續超預期</span><span class="tag">產品價格中樞持續上漲</span><span class="tag">供給偏緊</span><span class="tag">需求旺盛</span></div>
-  <div class="step" style="margin-top:8px"><b>④ 綜合判讀：</b>當量化指標與質化訊號同時成立時，列為優先研究名單。</div>
- </div>
- <div class="bar">
-  <div class="fld"><label>搜尋 代號/名稱</label><input type="text" id="q" placeholder="如 2330 / 南亞科"></div>
-  <div class="fld"><label>市場</label><select id="mkt"><option value="">上市+上櫃</option><option>上市</option><option>上櫃</option></select></div>
-  <div class="fld"><label>產業</label><select id="ind"></select></div>
-  <div class="fld"><label>最低 月營收YoY%</label><input type="number" id="minYoy" value="30" step="5"></div>
-  <div class="fld"><label>最低 累計YoY%</label><input type="number" id="minYtd" placeholder="不限"></div>
-  <div class="fld"><label>最低 毛利率%</label><input type="number" id="minGm" placeholder="不限"></div>
-  <div class="fld"><label class="chk"><input type="checkbox" id="epsPos">EPS&gt;0</label><label class="chk"><input type="checkbox" id="exLumpy" checked>排除建材/金融</label></div>
-  <div class="views"><button class="viewbtn on" data-v="all">全部</button><button class="viewbtn" data-v="focus">重點關注 (2+3)</button><button class="viewbtn" data-v="star">觀察清單 ★</button></div>
- </div>
- <div class="tablemeta"><div class="count" id="count"></div><div class="pager" id="pager"></div></div>
- <table id="tbl"><thead><tr>
-   <th></th><th class="l" data-s="name">公司</th><th class="l hideM" data-s="ind">產業</th>
-   <th data-s="yoy">月營收YoY%</th><th data-s="ytdYoy" class="hideM">累計YoY%</th><th data-s="gm" class="hideM">毛利率%</th>
-   <th data-s="eps">EPS<br><span style="font-weight:400;font-size:10px">季</span></th><th data-s="epsYoY">單季EPS<br>YoY%</th><th data-s="pe">本益比</th><th data-s="pb" class="hideM">淨值比</th>
-   <th data-s="price">股價</th><th data-s="chg" class="hideM">漲跌</th><th data-s="ph">措辭</th><th data-s="score">評級</th>
- </tr></thead><tbody id="tb"></tbody></table>
- <div class="note">說明：月營收 YoY 為較即時的營運動能指標，但<b>建材營造、金融保險</b>等產業之單月營收，常受交屋或評價等一次性認列影響而產生較大波動，因此預設排除。點開任一檔右側可查看<b>季度損益表（<span id="noteIncLabel">2026 Q1</span>）與近 12 個月營收走勢圖</b>。質化訊號仍需依原始財報與法說內容逐檔判讀；你的勾選、備註與 ★ 觀察名單將儲存在本機。資料為快照，非即時報價，不構成投資建議。</div>
+
+.drstats{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+
+.drstats-quick{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+
+.drstat{
+  padding:14px 16px;
+  border:1px solid var(--line-soft);
+  border-radius:18px;
+  background:var(--surface-soft);
+}
+
+.drstat .k{
+  color:var(--muted);
+  font-size:11px;
+}
+
+.drstat .v{
+  margin-top:6px;
+  font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
+  font-size:19px;
+  font-weight:500;
+}
+
+.drawer-section{
+  display:grid;
+  gap:12px;
+}
+
+.drawer-panel{
+  display:none;
+  gap:22px;
+}
+
+.drawer-panel.on{
+  display:grid;
+}
+
+.sec{
+  margin:0;
+  color:var(--ink);
+  font-size:15px;
+  font-weight:600;
+}
+
+.drawer-tabs{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+  padding:0 24px 18px;
+  border-bottom:1px solid var(--line-soft);
+}
+
+.drtab{
+  min-height:40px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--canvas);
+  color:var(--muted);
+  font-size:13px;
+  font-weight:600;
+}
+
+.drtab.on{
+  border-color:rgba(0,82,255,.24);
+  background:rgba(0,82,255,.08);
+  color:var(--primary);
+}
+
+.drawer-scroll{
+  min-height:0;
+  overflow-y:auto;
+  padding:0 24px 24px;
+}
+
+.overview-grid{
+  display:grid;
+  gap:10px;
+}
+
+.overview-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 16px;
+  border:1px solid var(--line-soft);
+  border-radius:18px;
+  background:var(--surface-soft);
+}
+
+.chartbox,
+.fintab-wrap{
+  padding:18px;
+  border:1px solid var(--line-soft);
+  border-radius:24px;
+  background:var(--surface-soft);
+}
+
+.chartbox{
+  height:220px;
+}
+
+.chartbox.compact{
+  height:188px;
+}
+
+.fintab{
+  width:100%;
+  min-width:0;
+  border:0;
+}
+
+.fintab td{
+  padding:12px 0;
+  font-size:13px;
+  background:transparent;
+}
+
+.fintab td:first-child{
+  color:var(--body);
+}
+
+.epstog{
+  display:inline-flex;
+  margin-left:8px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  overflow:hidden;
+  vertical-align:middle;
+}
+
+.epstog button{
+  min-height:32px;
+  padding:0 12px;
+  border:0;
+  background:var(--canvas);
+  color:var(--muted);
+  font-size:12px;
+  cursor:pointer;
+}
+
+.epstog button.on{
+  background:var(--ink);
+  color:var(--canvas);
+}
+
+.phrase-list{
+  display:grid;
+  gap:10px;
+}
+
+.ph{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  min-height:48px;
+  padding:0 16px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--canvas);
+  color:var(--body);
+  cursor:pointer;
+}
+
+.ph input{
+  width:16px;
+  height:16px;
+  accent-color:var(--primary);
+}
+
+.ph.on{
+  border-color:rgba(0,82,255,.26);
+  background:rgba(0,82,255,.06);
+  color:var(--ink);
+}
+
+textarea{
+  min-height:120px;
+  resize:vertical;
+}
+
+.links{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.links a{
+  display:inline-flex;
+  align-items:center;
+  min-height:36px;
+  padding:0 14px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--canvas);
+  color:var(--primary);
+  font-size:12px;
+  font-weight:600;
+  text-decoration:none;
+}
+
+.links a:hover{
+  border-color:rgba(0,82,255,.22);
+  background:rgba(0,82,255,.05);
+}
+
+@media (max-width:1320px){
+  .filter-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+
+@media (max-width:1180px){
+  .workspace{
+    grid-template-columns:1fr;
+  }
+
+  .hideT{
+    display:none;
+  }
+
+  .dr{
+    display:none;
+    top:0;
+    right:0;
+    bottom:0;
+    width:min(440px,100vw);
+    max-width:none;
+    height:100vh;
+    min-height:100vh;
+    border-radius:32px 0 0 32px;
+    transform:translateX(104%);
+    opacity:0;
+    pointer-events:none;
+  }
+
+  .dr.on{
+    display:grid;
+    transform:translateX(0);
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  .ov.on{
+    pointer-events:auto;
+  }
+}
+
+@media (max-width:980px){
+  .site-shell{
+    padding:0 16px 32px;
+  }
+
+  .topbar{
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:flex-start;
+    gap:14px;
+    padding:16px 0;
+  }
+
+  .hero{
+    grid-template-columns:1fr;
+    padding:36px 0 28px;
+  }
+
+  .playbook,
+  .summary-grid,
+  .hero-meta{
+    grid-template-columns:1fr;
+  }
+
+  .panel-head,
+  .table-tools,
+  .filter-foot{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .table-shell{
+    margin:0 12px;
+    border-radius:18px;
+  }
+}
+
+@media (max-width:720px){
+  .hero-copy h2{
+    max-width:none;
+  }
+
+  .filter-grid{
+    grid-template-columns:1fr;
+  }
+
+  .dr{
+    width:100vw;
+    border-radius:0;
+  }
+
+  .drstats{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .drawer-tabs{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .pager{
+    width:100%;
+    justify-content:flex-start;
+  }
+
+  .pagerstat{
+    width:100%;
+  }
+
+  .pagernav{
+    width:100%;
+  }
+
+  .pager button{
+    min-height:38px;
+    padding:0 12px;
+  }
+
+  .drawer-head{
+    gap:12px;
+  }
+
+  .hideS{
+    display:none;
+  }
+
+  th:nth-child(2),
+  td:nth-child(2){
+    width:120px;
+  }
+
+  th:nth-child(14),
+  td:nth-child(14){
+    width:72px;
+  }
+
+  .hideM{
+    display:none;
+  }
+}
+</style>
+</head>
+<body>
+<div class="site-shell">
+  <header class="topbar">
+    <div class="brand-lockup">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <div>
+        <div class="brand-name">台股篩選工具</div>
+        <div class="brand-sub">用量化初篩與質化追蹤，把研究名單整理成可持續更新的流程。</div>
+      </div>
+    </div>
+    <div class="topbar-meta">
+      <span class="topbar-chip" id="runtimeChip">載入中</span>
+      <span class="topbar-chip soft" id="heroCoverage">研究宇宙載入中</span>
+    </div>
+  </header>
+
+  <main>
+    <h1>台股篩選工具</h1>
+    <section class="hero">
+      <div class="hero-copy">
+        <div>
+          <h2>用制度化研究流程，快速篩出台股業績動能股。</h2>
+          <p>以月營收 YoY、累計 YoY、毛利率與 EPS 建立第一層訊號，再把法說與財報中的景氣關鍵措辭納入第二層判讀。左側維持大樣本排序，右側保留逐檔研究面板，讓初篩與深挖在同一個工作區完成。</p>
+        </div>
+
+        <div class="hero-signals">
+          <span class="signal-chip">月營收與累計動能</span>
+          <span class="signal-chip">毛利率 / EPS 驗證</span>
+          <span class="signal-chip">7 大關鍵措辭勾選</span>
+          <span class="signal-chip">重點關注與觀察清單</span>
+        </div>
+
+        <div class="playbook">
+          <article class="playbook-card">
+            <span class="playbook-step">01</span>
+            <h2>財報檢視時點</h2>
+            <p>每年 1、4、7、10 月集中回看季報、公開說明書與法說，先釐清營運趨勢，再進入篩選。</p>
+          </article>
+          <article class="playbook-card">
+            <span class="playbook-step">02</span>
+            <h2>量化初篩</h2>
+            <p>系統依月營收 YoY、累計 YoY、毛利率與 EPS 找出基本面變化較明確的公司。</p>
+          </article>
+          <article class="playbook-card">
+            <span class="playbook-step">03</span>
+            <h2>質化訊號研判</h2>
+            <p>逐檔核對法說、財報與產業資料，確認是否出現供不應求、需求旺盛與新品擴張等訊號。</p>
+          </article>
+          <article class="playbook-card">
+            <span class="playbook-step">04</span>
+            <h2>建立研究名單</h2>
+            <p>當量化與質化條件同時成立時，列入優先研究。勾選紀錄、筆記與觀察清單都會保留在本機。</p>
+          </article>
+        </div>
+      </div>
+
+      <aside class="hero-card">
+        <div>
+          <h2>資料快照與覆蓋範圍</h2>
+          <p>目前以交易所、櫃買中心與 MOPS 快照組成研究宇宙，設計成能快速比較、排序並回到逐檔判讀的工作台。</p>
+        </div>
+
+        <div class="hero-meta">
+          <div class="hero-meta-card">
+            <span>研究宇宙</span>
+            <strong id="statUniverse">-</strong>
+          </div>
+          <div class="hero-meta-card">
+            <span>上市</span>
+            <strong id="statListed">-</strong>
+          </div>
+          <div class="hero-meta-card">
+            <span>上櫃</span>
+            <strong id="statOtc">-</strong>
+          </div>
+        </div>
+
+        <div class="period-list">
+          <div class="period-row">
+            <span>月營收</span>
+            <strong id="statRevenuePeriod">-</strong>
+          </div>
+          <div class="period-row">
+            <span>損益表</span>
+            <strong id="statIncomePeriod">-</strong>
+          </div>
+          <div class="period-row">
+            <span>估值 / 股價</span>
+            <strong id="statValuationDate">-</strong>
+          </div>
+        </div>
+
+        <p class="snapshot-meta" id="snapshotMeta">資料快照載入中</p>
+      </aside>
+    </section>
+
+    <section class="summary-grid">
+      <article class="summary-card">
+        <span>符合目前條件</span>
+        <strong id="summaryMatches">-</strong>
+        <p>依目前搜尋、產業、門檻與市場條件計算。</p>
+      </article>
+      <article class="summary-card">
+        <span>重點關注</span>
+        <strong id="summaryFocus">-</strong>
+        <p>量化動能成立，且至少勾選一項關鍵措辭。</p>
+      </article>
+      <article class="summary-card">
+        <span>觀察清單</span>
+        <strong id="summaryWatch">-</strong>
+        <p>以星號加入本機追蹤名單，方便回頭複查。</p>
+      </article>
+      <article class="summary-card">
+        <span>目前檢視</span>
+        <strong id="summaryView">全部</strong>
+        <p>可切換全部、重點關注與觀察清單三種工作模式。</p>
+      </article>
+    </section>
+
+    <section class="workspace">
+      <div class="main-stack">
+        <section class="panel filter-panel">
+          <div class="panel-head">
+            <div>
+              <h2>篩選條件</h2>
+              <p>保留寬鬆入口，再逐步收斂到值得深挖的名單。切換檢視模式時，左側表格會同步更新。</p>
+            </div>
+          </div>
+
+          <div class="filter-grid">
+            <div class="fld">
+              <label for="q">搜尋代號 / 名稱</label>
+              <input type="text" id="q" placeholder="例如 2330 / 南亞科">
+            </div>
+            <div class="fld">
+              <label for="mkt">市場</label>
+              <select id="mkt">
+                <option value="">上市 + 上櫃</option>
+                <option>上市</option>
+                <option>上櫃</option>
+              </select>
+            </div>
+            <div class="fld">
+              <label for="ind">產業</label>
+              <select id="ind"></select>
+            </div>
+            <div class="fld">
+              <label for="minYoy">最低月營收 YoY %</label>
+              <input type="number" id="minYoy" value="30" step="5">
+            </div>
+            <div class="fld">
+              <label for="minYtd">最低累計 YoY %</label>
+              <input type="number" id="minYtd" placeholder="不限">
+            </div>
+            <div class="fld">
+              <label for="minGm">最低毛利率 %</label>
+              <input type="number" id="minGm" placeholder="不限">
+            </div>
+            <div class="flag-group">
+              <label class="chk"><input type="checkbox" id="epsPos">EPS &gt; 0</label>
+              <label class="chk"><input type="checkbox" id="exLumpy" checked>排除建材 / 金融</label>
+            </div>
+          </div>
+
+          <div class="filter-foot">
+            <div class="filter-note">預設先抓動能，再進右側研究面板確認財報與法說內容。</div>
+            <div class="views">
+              <button type="button" class="viewbtn on" data-v="all">全部</button>
+              <button type="button" class="viewbtn" data-v="focus">重點關注</button>
+              <button type="button" class="viewbtn" data-v="star">觀察清單</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel table-panel">
+          <div class="panel-head">
+            <div>
+              <h2>研究清單</h2>
+              <p>維持大樣本排序，點任一列就能把個股資料帶到右側，繼續深挖。</p>
+            </div>
+          </div>
+
+          <div class="table-tools">
+            <div class="count" id="count"></div>
+            <div class="pager" id="pager"></div>
+          </div>
+
+          <div class="table-shell">
+            <table id="tbl">
+              <thead>
+                <tr>
+                  <th></th>
+                  <th class="l" data-s="name">公司</th>
+                  <th class="l hideT hideM" data-s="ind">產業</th>
+                  <th data-s="yoy">月營收 YoY%</th>
+                  <th data-s="ytdYoy" class="hideM">累計 YoY%</th>
+                  <th data-s="gm" class="hideM">毛利率%</th>
+                  <th data-s="eps" class="hideS">EPS<br><span class="th-sub">季</span></th>
+                  <th data-s="epsYoY" class="hideS">單季 EPS<br>YoY%</th>
+                  <th data-s="pe" class="hideS">本益比</th>
+                  <th data-s="pb" class="hideT hideM">淨值比</th>
+                  <th data-s="price" class="hideS">股價</th>
+                  <th data-s="chg" class="hideT hideM">漲跌</th>
+                  <th data-s="ph" class="hideS">措辭</th>
+                  <th data-s="score">評級</th>
+                </tr>
+              </thead>
+              <tbody id="tb"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="note">說明：月營收 YoY 是較即時的營運動能指標，但<b>建材營造、金融保險</b>等產業常受一次性認列影響，因此預設排除。點開任一檔後，可同步查看<b>季度損益表（<span id="noteIncLabel">-</span>）與近 12 個月營收走勢圖</b>。資料為快照，非即時報價，不構成投資建議。</div>
+      </div>
+
+      <aside class="dr" id="dr">
+        <div class="drawer-empty">
+          <span class="drawer-empty-mark" aria-hidden="true"></span>
+          <h2>選一檔展開研究面板</h2>
+          <p>從研究清單挑選公司後，這裡會顯示摘要、圖表、財報與你的研究筆記。桌機會用浮動側邊面板深讀，行動裝置則維持右側抽屜。</p>
+        </div>
+
+        <div class="drawer-content">
+          <div class="drawer-head">
+            <div>
+              <p class="drawer-sub">個股研究面板</p>
+              <h2 class="drawer-title" id="dName"></h2>
+              <div class="muted drawer-meta" id="dMeta"></div>
+            </div>
+            <button type="button" class="close" id="close">關閉</button>
+          </div>
+
+          <div class="drawer-actions">
+            <button type="button" class="drbtn ghost" id="dRefresh">更新個股資訊</button>
+          </div>
+          <div class="muted refreshstatus" id="dRefreshStatus"></div>
+
+          <nav class="drawer-tabs" id="dTabs" aria-label="個股研究段落" role="tablist">
+            <button type="button" class="drtab on" id="tab-overview" data-section="overview" aria-selected="true" aria-controls="panel-overview" tabindex="0" role="tab">總覽</button>
+            <button type="button" class="drtab" id="tab-charts" data-section="charts" aria-selected="false" aria-controls="panel-charts" tabindex="-1" role="tab">圖表</button>
+            <button type="button" class="drtab" id="tab-financials" data-section="financials" aria-selected="false" aria-controls="panel-financials" tabindex="-1" role="tab">財報</button>
+            <button type="button" class="drtab" id="tab-notes" data-section="notes" aria-selected="false" aria-controls="panel-notes" tabindex="-1" role="tab">筆記</button>
+          </nav>
+
+          <div class="drawer-scroll">
+            <section class="drawer-panel on" id="panel-overview" data-panel="overview" aria-labelledby="tab-overview" role="tabpanel">
+              <div class="drstats drstats-quick" id="dStats"></div>
+              <section class="drawer-section">
+                <div class="sec">快速摘要</div>
+                <div class="overview-grid" id="dOverview"></div>
+              </section>
+            </section>
+
+            <section class="drawer-panel" id="panel-charts" data-panel="charts" aria-labelledby="tab-charts" role="tabpanel" hidden>
+              <section class="drawer-section">
+                <div class="sec">近 12 個月營收（億元）</div>
+                <div class="chartbox"><canvas id="dChart"></canvas></div>
+              </section>
+
+              <section class="drawer-section">
+                <div class="sec">EPS（元）與去年同期對比 <span class="epstog"><button type="button" id="emS" class="on">單季</button><button type="button" id="emC">累計</button></span><br><span id="dEpsYoY" class="muted"></span></div>
+                <div class="chartbox compact"><canvas id="dEps"></canvas></div>
+              </section>
+            </section>
+
+            <section class="drawer-panel" id="panel-financials" data-panel="financials" aria-labelledby="tab-financials" role="tabpanel" hidden>
+              <section class="drawer-section">
+                <div class="sec" id="dFinTitle">季度損益表</div>
+                <div class="fintab-wrap">
+                  <table class="fintab"><tbody id="dFin"></tbody></table>
+                </div>
+              </section>
+
+              <section class="drawer-section">
+                <div class="sec">關鍵措辭檢核</div>
+                <div class="phrase-list" id="dPhrases"></div>
+              </section>
+            </section>
+
+            <section class="drawer-panel" id="panel-notes" data-panel="notes" aria-labelledby="tab-notes" role="tabpanel" hidden>
+              <section class="drawer-section">
+                <div class="sec">備註 / 重點摘錄</div>
+                <textarea id="dNote" placeholder="例如：法說提到 HBM 供不應求，Q3 報價續漲。"></textarea>
+              </section>
+
+              <section class="drawer-section">
+                <div class="sec">參考連結</div>
+                <div class="links" id="dLinks"></div>
+              </section>
+            </section>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
 </div>
+
 <div class="ov" id="ov"></div>
-<div class="dr" id="dr">
- <span class="close" id="close">✕</span>
- <h2 id="dName"></h2><div class="muted" id="dMeta"></div>
- <div class="dractions"><button class="drbtn ghost" id="dRefresh">更新個股資訊</button></div>
- <div class="muted refreshstatus" id="dRefreshStatus"></div>
- <div class="drstats" id="dStats"></div>
- <div class="sec">近 12 個月營收（億元）</div>
- <div class="chartbox"><canvas id="dChart"></canvas></div>
- <div class="sec">EPS（元）· 去年同期對比 <span class="epstog"><button id="emS" class="on">單季</button><button id="emC">累計</button></span><br><span id="dEpsYoY" class="muted" style="font-weight:400"></span></div>
- <div class="chartbox" style="height:160px"><canvas id="dEps"></canvas></div>
- <div class="sec" id="dFinTitle">季度損益表</div>
- <table class="fintab"><tbody id="dFin"></tbody></table>
- <div class="sec">③ 關鍵措辭（讀完財報/法說後勾選）</div>
- <div id="dPhrases"></div>
- <div class="sec">備註 / 重點摘錄</div>
- <textarea id="dNote" placeholder="例：法說提到 HBM 供不應求，Q3 報價續漲…"></textarea>
- <div class="sec">參考連結</div>
- <div class="links" id="dLinks"></div>
-</div>
 <script src="./assets/app/seed-snapshot.js"></script>
-<script type="module" src="./assets/app/main.js"></script></body></html>
+<script type="module" src="./assets/app/main.js"></script>
+</body>
+</html>

@@ -84,3 +84,29 @@ test("hydrateLatestSnapshot applies the body and updates the etag on 200", async
   assert.equal(ui.calls.render, 1);
   assert.equal(state.page, 1);
 });
+
+test("hydrateLatestSnapshot reopens the requested stock after replacing rows", async (t) => {
+  const state = { snapshotEtag: '"old"', rows: [], page: 2 };
+  const ui = fakeUi();
+  const flow = createRefreshFlow({ state, ui, runtime: liveRuntime() });
+
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async () =>
+    new Response(JSON.stringify(fullSnapshot({ revPeriodROC: "11506" })), {
+      status: 200,
+      headers: { "content-type": "application/json", etag: '"new"' },
+    });
+  t.after(() => {
+    globalThis.fetch = realFetch;
+  });
+
+  const result = await flow.hydrateLatestSnapshot({
+    reopenCode: "2330",
+    resetPage: false,
+  });
+
+  assert.equal(result, true);
+  assert.equal(ui.calls.resetDrawer, 1);
+  assert.deepEqual(ui.calls.openDrawer, ["2330"]);
+  assert.equal(state.page, 2);
+});
