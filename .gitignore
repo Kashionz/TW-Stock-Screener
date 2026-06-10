@@ -1,3 +1,6 @@
 .vercel
 .env*
 node_modules/
+.playwright-cli/
+.playwright-mcp/
+.superpowers/
