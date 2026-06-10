@@ -111,6 +111,7 @@ a{color:inherit}
   gap:10px;
   align-items:center;
   justify-content:flex-end;
+  position:relative;
 }
 
 .topbar-chip{
@@ -139,11 +140,6 @@ a{color:inherit}
   background:var(--surface-soft);
 }
 
-.hero{
-  display:block;
-  padding:24px 0 22px;
-}
-
 main > h1{
   position:absolute;
   width:1px;
@@ -156,7 +152,52 @@ main > h1{
   border:0;
 }
 
-.hero-card{
+.source-popover{
+  position:relative;
+}
+
+.source-trigger{
+  list-style:none;
+  cursor:pointer;
+}
+
+.source-trigger::-webkit-details-marker{
+  display:none;
+}
+
+.source-trigger.info::before{
+  content:"i";
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  background:var(--surface-strong);
+  color:var(--primary);
+  font-size:11px;
+  font-weight:700;
+}
+
+.source-trigger.info::after{
+  content:"▾";
+  color:var(--muted);
+  font-size:11px;
+}
+
+.source-popover[open] .source-trigger.info::after{
+  content:"▴";
+}
+
+.source-popover-panel{
+  position:absolute;
+  top:calc(100% + 12px);
+  right:0;
+  z-index:30;
+  width:min(440px,calc(100vw - 48px));
+}
+
+.source-card{
   display:grid;
   gap:18px;
   min-height:100%;
@@ -167,9 +208,10 @@ main > h1{
   background:rgba(255,255,255,.92);
   color:var(--ink);
   box-shadow:var(--shadow-sm);
+  overflow:hidden;
 }
 
-.hero-card h2{
+.source-card h2{
   margin:0 0 8px;
   font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
   font-size:22px;
@@ -177,7 +219,7 @@ main > h1{
   letter-spacing:-.03em;
 }
 
-.hero-card p{
+.source-card p{
   margin:0;
   color:var(--body);
   font-size:14px;
@@ -270,7 +312,7 @@ main > h1{
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
   gap:14px;
-  margin-bottom:22px;
+  margin:22px 0;
 }
 
 .summary-card{
@@ -1344,8 +1386,9 @@ textarea{
     padding:16px 0;
   }
 
-  .hero{
-    padding:24px 0 20px;
+  .topbar-meta{
+    width:100%;
+    justify-content:flex-start;
   }
 
   .summary-grid{
@@ -1366,6 +1409,12 @@ textarea{
 }
 
 @media (max-width:720px){
+  .source-popover-panel{
+    left:0;
+    right:auto;
+    width:min(100vw - 32px,440px);
+  }
+
   .hero-meta{
     grid-template-columns:repeat(3,minmax(0,1fr));
   }
@@ -1504,66 +1553,69 @@ textarea{
     </div>
     <div class="topbar-meta">
       <span class="topbar-chip" id="runtimeChip">載入中</span>
+      <span class="topbar-chip soft" id="lastUpdatedChip">最後更新載入中</span>
       <span class="topbar-chip soft" id="heroCoverage">股票清單載入中</span>
+      <details class="source-popover">
+        <summary class="topbar-chip soft source-trigger info" id="sourceInfoToggle">資料資訊</summary>
+        <div class="source-popover-panel">
+          <section class="source-card" id="sourceInfoPanel">
+            <div>
+              <h2>資料來源</h2>
+              <p>快速確認這批快照涵蓋哪些股票、目前對應到哪一期資料。</p>
+            </div>
+
+            <div class="hero-meta">
+              <div class="hero-meta-card">
+                <span>全部股票</span>
+                <strong id="statUniverse">-</strong>
+              </div>
+              <div class="hero-meta-card">
+                <span>上市</span>
+                <strong id="statListed">-</strong>
+              </div>
+              <div class="hero-meta-card">
+                <span>上櫃</span>
+                <strong id="statOtc">-</strong>
+              </div>
+            </div>
+
+            <div class="period-list">
+              <div class="period-row">
+                <span>月營收</span>
+                <strong id="statRevenuePeriod">-</strong>
+              </div>
+              <div class="period-row">
+                <span>損益表</span>
+                <strong id="statIncomePeriod">-</strong>
+              </div>
+              <div class="period-row">
+                <span>估值 / 股價</span>
+                <strong id="statValuationDate">-</strong>
+              </div>
+            </div>
+
+            <dl class="source-list" aria-label="資料來源明細">
+              <div class="source-row">
+                <dt>更新頻率</dt>
+                <dd id="sourceFrequency">每天更新一次</dd>
+              </div>
+              <div class="source-row">
+                <dt>資料來源</dt>
+                <dd id="sourceOrigin">證交所、櫃買中心、公開資訊觀測站</dd>
+              </div>
+              <div class="source-row">
+                <dt>涵蓋範圍</dt>
+                <dd id="sourceCoverage">資料快照載入中</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
+      </details>
     </div>
   </header>
 
   <main>
     <h1>台股篩選工具</h1>
-    <section class="hero">
-      <aside class="hero-card" id="heroSnapshot">
-        <div>
-          <h2>資料來源</h2>
-          <p>快速確認這批快照涵蓋哪些股票、目前對應到哪一期資料。</p>
-        </div>
-
-        <div class="hero-meta">
-          <div class="hero-meta-card">
-            <span>全部股票</span>
-            <strong id="statUniverse">-</strong>
-          </div>
-          <div class="hero-meta-card">
-            <span>上市</span>
-            <strong id="statListed">-</strong>
-          </div>
-          <div class="hero-meta-card">
-            <span>上櫃</span>
-            <strong id="statOtc">-</strong>
-          </div>
-        </div>
-
-        <div class="period-list">
-          <div class="period-row">
-            <span>月營收</span>
-            <strong id="statRevenuePeriod">-</strong>
-          </div>
-          <div class="period-row">
-            <span>損益表</span>
-            <strong id="statIncomePeriod">-</strong>
-          </div>
-          <div class="period-row">
-            <span>估值 / 股價</span>
-            <strong id="statValuationDate">-</strong>
-          </div>
-        </div>
-
-        <dl class="source-list" aria-label="資料來源明細">
-          <div class="source-row">
-            <dt>更新頻率</dt>
-            <dd id="sourceFrequency">每天更新一次</dd>
-          </div>
-          <div class="source-row">
-            <dt>資料來源</dt>
-            <dd id="sourceOrigin">證交所、櫃買中心、公開資訊觀測站</dd>
-          </div>
-          <div class="source-row">
-            <dt>涵蓋範圍</dt>
-            <dd id="sourceCoverage">資料快照載入中</dd>
-          </div>
-        </dl>
-      </aside>
-    </section>
-
     <section class="summary-grid">
       <article class="summary-card">
         <span>符合目前條件</span>

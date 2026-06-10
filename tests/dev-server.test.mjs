@@ -86,9 +86,11 @@ test("startDevServer serves static UI, snapshot, and authorized refresh", async 
     assert.equal(authorizedRefreshResponse.status, 200);
     const authorizedRefreshPayload = await authorizedRefreshResponse.json();
     assert.equal(authorizedRefreshPayload.meta.revPeriodROC, "11505");
+    assert.ok(authorizedRefreshPayload.storedAt);
 
     const writtenSnapshot = JSON.parse(await readFile(snapshotPath, "utf8"));
     assert.equal(writtenSnapshot.meta.revPeriodROC, "11505");
+    assert.ok(writtenSnapshot.storedAt);
 
     const seedSnapshot = await readFile(seedSnapshotPath, "utf8");
     assert.match(seedSnapshot, /window\.__TWSE_INITIAL_SNAPSHOT__=/u);

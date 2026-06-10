@@ -22,6 +22,7 @@ import {
   rocDateLabel,
   signedFmt,
   snapshotCoverageLabel,
+  snapshotUpdatedLabel,
   ymLabel,
 } from "./helpers.js";
 
@@ -157,6 +158,7 @@ export function collectDom(documentRoot = document) {
     pagerBottom: documentRoot.getElementById("pagerBottom"),
     tb: documentRoot.getElementById("tb"),
     runtimeChip: documentRoot.getElementById("runtimeChip"),
+    lastUpdatedChip: documentRoot.getElementById("lastUpdatedChip"),
     heroCoverage: documentRoot.getElementById("heroCoverage"),
     statUniverse: documentRoot.getElementById("statUniverse"),
     statListed: documentRoot.getElementById("statListed"),
@@ -233,9 +235,11 @@ export function createAppUi({ state, dom, runtime }) {
 
   function syncSnapshotMeta() {
     const { meta } = state.snapshot;
+    const updatedLabel = snapshotUpdatedLabel(state.snapshot);
 
     dom.noteIncLabel.textContent = state.incLabel;
     dom.runtimeChip.textContent = runtime && runtime.hasLiveApi ? "本機更新模式" : "靜態快照模式";
+    dom.lastUpdatedChip.textContent = updatedLabel ? `最後更新 ${updatedLabel}` : "最後更新載入中";
     dom.heroCoverage.textContent = `${meta.count.toLocaleString()} 檔股票`;
     dom.statUniverse.textContent = meta.count.toLocaleString();
     dom.statListed.textContent = meta.tw.toLocaleString();

@@ -5,13 +5,12 @@ const source = readFrontendSource();
 
 const requiredMarkers = [
   {
-    label: "hero intro removed",
+    label: "topbar source info trigger",
     ok:
-      !html.includes('id="heroToggle"') &&
-      !html.includes('id="heroPlaybook"') &&
-      !html.includes('class="hero-copy"') &&
-      !html.includes("先看財報") &&
-      !html.includes("設條件篩"),
+      html.includes('id="sourceInfoToggle"') &&
+      html.includes('class="source-popover"') &&
+      html.includes('id="lastUpdatedChip"') &&
+      !html.includes('id="heroSnapshot"'),
   },
   {
     label: "structured source details",

@@ -27,6 +27,35 @@ export function snapshotCoverageLabel(meta) {
   return `上市 ${meta.tw} ＋ 上櫃 ${meta.otc} ＝ ${meta.count} 檔`;
 }
 
+export function isoDateTimeLabel(value, timeZone = "Asia/Taipei") {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const formatter = new Intl.DateTimeFormat("en-GB", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+
+  const parts = Object.fromEntries(
+    formatter
+      .formatToParts(date)
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, part.value]),
+  );
+
+  return `${parts.year}/${parts.month}/${parts.day} ${parts.hour}:${parts.minute}`;
+}
+
+export function snapshotUpdatedLabel(snapshot) {
+  return isoDateTimeLabel(snapshot?.storedAt) || rocDateLabel(snapshot?.meta?.valDateROC);
+}
+
 export function fmt(value, digits = 2) {
   return value == null ? '<span class="muted">—</span>' : Number(value).toFixed(digits);
 }
