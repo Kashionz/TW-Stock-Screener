@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   applyDrawerSectionUi,
+  buildFinancialTable,
   buildDrawerMeta,
   getQuickStats,
   resetDrawerScrollPosition,
@@ -46,6 +47,13 @@ test("getQuickStats keeps the overview cards to the four primary metrics", () =>
     stats.map(([label]) => label),
     ["月營收YoY", "累計YoY", "毛利率", "EPS(季)"],
   );
+});
+
+test("buildFinancialTable marks the unsupported-state row for centered layout", () => {
+  const html = buildFinancialTable({ fin: null });
+
+  assert.equal(html.includes("financial-empty"), true);
+  assert.equal(html.includes("損益表欄位不適用"), true);
 });
 
 test("summarizeDrawerNote collapses whitespace and truncates long notes", () => {

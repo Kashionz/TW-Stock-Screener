@@ -26,10 +26,10 @@ import {
   ymLabel,
 } from "./helpers.js";
 
-function buildFinancialTable(row) {
+export function buildFinancialTable(row) {
   const financials = row.fin;
   if (!financials) {
-    return '<tr><td class="muted" colspan="2">此檔（多為金融/特殊業）損益表欄位不適用</td></tr>';
+    return '<tr><td class="muted financial-empty" colspan="2">此檔（多為金融/特殊業）損益表欄位不適用</td></tr>';
   }
 
   const rows = [
