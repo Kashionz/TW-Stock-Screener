@@ -5,16 +5,13 @@ const source = readFrontendSource();
 
 const requiredMarkers = [
   {
-    label: "hero toggle markup",
+    label: "hero intro removed",
     ok:
-      html.includes('id="heroToggle"') &&
-      html.includes('aria-controls="heroPlaybook heroSnapshot"'),
-  },
-  {
-    label: "hero collapse wiring",
-    ok:
-      source.includes('classList.toggle("hero-expanded")') &&
-      /\.hero\.hero-expanded #heroPlaybook/.test(html),
+      !html.includes('id="heroToggle"') &&
+      !html.includes('id="heroPlaybook"') &&
+      !html.includes('class="hero-copy"') &&
+      !html.includes("先看財報") &&
+      !html.includes("設條件篩"),
   },
   {
     label: "structured source details",

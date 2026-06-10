@@ -158,8 +158,6 @@ export function collectDom(documentRoot = document) {
     tb: documentRoot.getElementById("tb"),
     runtimeChip: documentRoot.getElementById("runtimeChip"),
     heroCoverage: documentRoot.getElementById("heroCoverage"),
-    hero: documentRoot.querySelector(".hero"),
-    heroToggle: documentRoot.getElementById("heroToggle"),
     statUniverse: documentRoot.getElementById("statUniverse"),
     statListed: documentRoot.getElementById("statListed"),
     statOtc: documentRoot.getElementById("statOtc"),

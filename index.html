@@ -105,11 +105,6 @@ a{color:inherit}
   letter-spacing:-.03em;
 }
 
-.brand-sub{
-  color:var(--body);
-  font-size:12px;
-}
-
 .topbar-meta{
   display:flex;
   flex-wrap:wrap;
@@ -145,16 +140,8 @@ a{color:inherit}
 }
 
 .hero{
-  display:grid;
-  grid-template-columns:minmax(0,1.2fr) minmax(360px,.8fr);
-  gap:24px;
-  padding:32px 0 28px;
-}
-
-.hero-copy{
-  display:grid;
-  gap:18px;
-  align-content:start;
+  display:block;
+  padding:24px 0 22px;
 }
 
 main > h1{
@@ -169,91 +156,11 @@ main > h1{
   border:0;
 }
 
-.hero-copy h2{
-  margin:0;
-  max-width:16em;
-  font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
-  font-size:clamp(30px,3.2vw,46px);
-  font-weight:400;
-  line-height:1.1;
-  letter-spacing:-.05em;
-}
-
-.hero-copy p{
-  margin:0;
-  max-width:52rem;
-  color:var(--body);
-  font-size:16px;
-}
-
-.hero-signals{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-}
-
-.signal-chip{
-  display:inline-flex;
-  align-items:center;
-  min-height:38px;
-  padding:0 14px;
-  border:1px solid var(--line);
-  border-radius:var(--radius-pill);
-  background:var(--canvas);
-  color:var(--body);
-  font-size:13px;
-}
-
-.hero-toggle{
-  display:none;
-}
-
-.playbook{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:12px;
-}
-
-.playbook-card{
-  min-height:100%;
-  padding:14px 16px;
-  border:1px solid rgba(222,225,230,.9);
-  border-radius:var(--radius-md);
-  background:rgba(255,255,255,.92);
-  box-shadow:var(--shadow-sm);
-}
-
-.playbook-step{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-width:44px;
-  min-height:26px;
-  margin-bottom:8px;
-  border-radius:var(--radius-pill);
-  background:var(--surface-strong);
-  color:var(--ink);
-  font-family:"SFMono-Regular","Menlo","Roboto Mono",monospace;
-  font-size:12px;
-  font-weight:500;
-}
-
-.playbook-card h2{
-  margin:0 0 8px;
-  font-size:15px;
-  font-weight:600;
-}
-
-.playbook-card p{
-  margin:0;
-  color:var(--body);
-  font-size:13px;
-}
-
 .hero-card{
   display:grid;
   gap:18px;
   min-height:100%;
+  width:100%;
   padding:22px;
   border:1px solid rgba(222,225,230,.92);
   border-radius:30px;
@@ -1438,45 +1345,9 @@ textarea{
   }
 
   .hero{
-    grid-template-columns:1fr;
     padding:24px 0 20px;
   }
 
-  .hero-toggle{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    min-height:44px;
-    padding:0 18px;
-    border:1px solid var(--line);
-    border-radius:var(--radius-pill);
-    background:var(--canvas);
-    font-size:14px;
-    font-weight:600;
-    cursor:pointer;
-    justify-self:start;
-  }
-
-  .hero-toggle::after{
-    content:"▾";
-    margin-left:8px;
-  }
-
-  .hero.hero-expanded .hero-toggle::after{
-    content:"▴";
-  }
-
-  #heroPlaybook,
-  #heroSnapshot{
-    display:none;
-  }
-
-  .hero.hero-expanded #heroPlaybook,
-  .hero.hero-expanded #heroSnapshot{
-    display:grid;
-  }
-
-  .playbook,
   .summary-grid{
     grid-template-columns:1fr;
   }
@@ -1495,10 +1366,6 @@ textarea{
 }
 
 @media (max-width:720px){
-  .hero-copy h2{
-    max-width:none;
-  }
-
   .hero-meta{
     grid-template-columns:repeat(3,minmax(0,1fr));
   }
@@ -1633,7 +1500,6 @@ textarea{
       <span class="brand-mark" aria-hidden="true"></span>
       <div>
         <div class="brand-name">台股篩選工具</div>
-        <div class="brand-sub">找出營收、獲利在成長的台股，再幫你一檔一檔追蹤。</div>
       </div>
     </div>
     <div class="topbar-meta">
@@ -1645,45 +1511,6 @@ textarea{
   <main>
     <h1>台股篩選工具</h1>
     <section class="hero">
-      <div class="hero-copy">
-        <div>
-          <h2>找出營收、獲利在成長的台股</h2>
-          <p>設好月營收年增率、累計年增率、毛利率和 EPS 的門檻，符合的股票就列出來。點開任一檔，看它的營收走勢、損益表和 EPS 圖。</p>
-        </div>
-
-        <div class="hero-signals">
-          <span class="signal-chip">月營收成長</span>
-          <span class="signal-chip">毛利率 / EPS</span>
-          <span class="signal-chip">勾關鍵措辭</span>
-          <span class="signal-chip">加星追蹤</span>
-        </div>
-
-        <button type="button" class="hero-toggle" id="heroToggle" aria-expanded="false" aria-controls="heroPlaybook heroSnapshot">怎麼用、資料從哪來</button>
-
-        <div class="playbook" id="heroPlaybook">
-          <article class="playbook-card">
-            <span class="playbook-step">01</span>
-            <h2>先看財報</h2>
-            <p>每年 1、4、7、10 月財報出來後，先翻一輪季報和法說，了解公司近況。</p>
-          </article>
-          <article class="playbook-card">
-            <span class="playbook-step">02</span>
-            <h2>設條件篩</h2>
-            <p>設好月營收年增率、累計年增率、毛利率和 EPS 的門檻，符合的股票就列出來。</p>
-          </article>
-          <article class="playbook-card">
-            <span class="playbook-step">03</span>
-            <h2>點開細看</h2>
-            <p>點進單一檔看財報和圖，確認有沒有供不應求、需求旺盛、新品上市這類好消息。</p>
-          </article>
-          <article class="playbook-card">
-            <span class="playbook-step">04</span>
-            <h2>勾選追蹤</h2>
-            <p>覺得不錯就勾關鍵措辭、加星、寫筆記，這些紀錄都存在你自己的瀏覽器裡。</p>
-          </article>
-        </div>
-      </div>
-
       <aside class="hero-card" id="heroSnapshot">
         <div>
           <h2>資料來源</h2>
