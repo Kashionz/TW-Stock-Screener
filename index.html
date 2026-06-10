@@ -51,7 +51,8 @@ body{
   font-family:"PingFang TC","Avenir Next","Helvetica Neue","Microsoft JhengHei",sans-serif;
   color:var(--ink);
   background:
-    linear-gradient(180deg,var(--canvas) 0 360px,var(--surface-soft) 360px 100%);
+    radial-gradient(1200px 380px at 50% -40px, rgba(0,82,255,.055) 0%, rgba(0,82,255,0) 72%),
+    linear-gradient(180deg,#ffffff 0%, #fbfcfe 24%, #f6f7f9 58%, #f3f4f6 100%);
   font-size:14px;
   line-height:1.5;
   overflow-x:hidden;
@@ -161,8 +162,25 @@ main > h1{
   cursor:pointer;
 }
 
+.sr-only{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0 0 0 0);
+  white-space:nowrap;
+  border:0;
+}
+
 .source-trigger::-webkit-details-marker{
   display:none;
+}
+
+.source-trigger.info{
+  gap:6px;
+  padding:0 12px;
 }
 
 .source-trigger.info::before{
@@ -212,17 +230,11 @@ main > h1{
 }
 
 .source-card h2{
-  margin:0 0 8px;
+  margin:0;
   font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
   font-size:22px;
   font-weight:500;
   letter-spacing:-.03em;
-}
-
-.source-card p{
-  margin:0;
-  color:var(--body);
-  font-size:14px;
 }
 
 .hero-meta{
@@ -331,17 +343,11 @@ main > h1{
 
 .summary-card strong{
   display:block;
-  margin:10px 0 6px;
+  margin:10px 0 0;
   font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
   font-size:32px;
   font-weight:500;
   letter-spacing:-.04em;
-}
-
-.summary-card p{
-  margin:0;
-  color:var(--body);
-  font-size:12px;
 }
 
 .workspace{
@@ -378,17 +384,11 @@ main > h1{
 }
 
 .panel-head h2{
-  margin:0 0 6px;
+  margin:0;
   font-family:"Avenir Next","PingFang TC","Helvetica Neue",sans-serif;
   font-size:28px;
   font-weight:500;
   letter-spacing:-.03em;
-}
-
-.panel-head p{
-  margin:0;
-  color:var(--body);
-  font-size:13px;
 }
 
 /* 篩選面板專屬：標題齊左對齊輸入框、收斂 hero 級距與留白（不影響研究清單） */
@@ -400,11 +400,7 @@ main > h1{
 .filter-panel .panel-head h2{
   font-size:20px;
   letter-spacing:-.01em;
-  margin:0 0 4px;
-}
-
-.filter-panel .panel-head p{
-  line-height:1.4;
+  margin:0;
 }
 
 .filter-panel{
@@ -518,11 +514,6 @@ textarea:focus{
   justify-content:space-between;
   gap:14px;
   margin-top:18px;
-}
-
-.filter-note{
-  color:var(--body);
-  font-size:12px;
 }
 
 .views{
@@ -1552,16 +1543,15 @@ textarea{
       </div>
     </div>
     <div class="topbar-meta">
-      <span class="topbar-chip" id="runtimeChip">載入中</span>
       <span class="topbar-chip soft" id="lastUpdatedChip">最後更新載入中</span>
-      <span class="topbar-chip soft" id="heroCoverage">股票清單載入中</span>
       <details class="source-popover">
-        <summary class="topbar-chip soft source-trigger info" id="sourceInfoToggle">資料資訊</summary>
+        <summary class="topbar-chip soft source-trigger info" id="sourceInfoToggle" aria-label="資料來源" title="資料來源">
+          <span class="sr-only">資料來源</span>
+        </summary>
         <div class="source-popover-panel">
           <section class="source-card" id="sourceInfoPanel">
             <div>
               <h2>資料來源</h2>
-              <p>快速確認這批快照涵蓋哪些股票、目前對應到哪一期資料。</p>
             </div>
 
             <div class="hero-meta">
@@ -1596,6 +1586,10 @@ textarea{
 
             <dl class="source-list" aria-label="資料來源明細">
               <div class="source-row">
+                <dt>更新模式</dt>
+                <dd id="runtimeChip">載入中</dd>
+              </div>
+              <div class="source-row">
                 <dt>更新頻率</dt>
                 <dd id="sourceFrequency">每天更新一次</dd>
               </div>
@@ -1618,24 +1612,20 @@ textarea{
     <h1>台股篩選工具</h1>
     <section class="summary-grid">
       <article class="summary-card">
+        <span>全部股票</span>
+        <strong id="summaryUniverse">-</strong>
+      </article>
+      <article class="summary-card">
         <span>符合目前條件</span>
         <strong id="summaryMatches">-</strong>
-        <p>依你現在設的搜尋、產業、門檻和市場條件算出來的。</p>
       </article>
       <article class="summary-card">
         <span>重點關注</span>
         <strong id="summaryFocus">-</strong>
-        <p>營收明顯在成長，而且你至少勾了一項關鍵措辭。</p>
       </article>
       <article class="summary-card">
         <span>觀察清單</span>
         <strong id="summaryWatch">-</strong>
-        <p>按星號加進追蹤名單，方便之後回頭再看。</p>
-      </article>
-      <article class="summary-card">
-        <span>目前檢視</span>
-        <strong id="summaryView">全部</strong>
-        <p>可切換全部、重點關注、觀察清單三種看法。</p>
       </article>
     </section>
 
@@ -1645,7 +1635,6 @@ textarea{
           <div class="panel-head">
             <div>
               <h2>篩選條件</h2>
-              <p>條件可以先設寬鬆一點，再慢慢縮小到想深入看的名單。</p>
             </div>
           </div>
 
@@ -1685,7 +1674,6 @@ textarea{
           </div>
 
           <div class="filter-foot">
-            <div class="filter-note">預設先抓營收在成長的，再點開右側面板看財報和法說。</div>
             <div class="views">
               <button type="button" class="viewbtn on" data-v="all">全部</button>
               <button type="button" class="viewbtn" data-v="focus">重點關注</button>
@@ -1698,7 +1686,6 @@ textarea{
           <div class="panel-head">
             <div>
               <h2>研究清單</h2>
-              <p>篩選結果都列在這裡，點任一檔就能在右側看它的詳細資料。</p>
             </div>
           </div>
 

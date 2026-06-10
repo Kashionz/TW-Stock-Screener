@@ -78,12 +78,6 @@ const SORT_LABELS = {
   price: "股價",
 };
 
-const VIEW_LABELS = {
-  all: "全部",
-  focus: "重點關注",
-  star: "觀察清單",
-};
-
 export function getQuickStats(row) {
   return [
     ["月營收YoY", pct(row.yoy)],
@@ -159,17 +153,16 @@ export function collectDom(documentRoot = document) {
     tb: documentRoot.getElementById("tb"),
     runtimeChip: documentRoot.getElementById("runtimeChip"),
     lastUpdatedChip: documentRoot.getElementById("lastUpdatedChip"),
-    heroCoverage: documentRoot.getElementById("heroCoverage"),
     statUniverse: documentRoot.getElementById("statUniverse"),
     statListed: documentRoot.getElementById("statListed"),
     statOtc: documentRoot.getElementById("statOtc"),
     statRevenuePeriod: documentRoot.getElementById("statRevenuePeriod"),
     statIncomePeriod: documentRoot.getElementById("statIncomePeriod"),
     statValuationDate: documentRoot.getElementById("statValuationDate"),
+    summaryUniverse: documentRoot.getElementById("summaryUniverse"),
     summaryMatches: documentRoot.getElementById("summaryMatches"),
     summaryFocus: documentRoot.getElementById("summaryFocus"),
     summaryWatch: documentRoot.getElementById("summaryWatch"),
-    summaryView: documentRoot.getElementById("summaryView"),
     sourceFrequency: documentRoot.getElementById("sourceFrequency"),
     sourceOrigin: documentRoot.getElementById("sourceOrigin"),
     sourceCoverage: documentRoot.getElementById("sourceCoverage"),
@@ -238,9 +231,8 @@ export function createAppUi({ state, dom, runtime }) {
     const updatedLabel = snapshotUpdatedLabel(state.snapshot);
 
     dom.noteIncLabel.textContent = state.incLabel;
-    dom.runtimeChip.textContent = runtime && runtime.hasLiveApi ? "本機更新模式" : "靜態快照模式";
+    dom.runtimeChip.textContent = runtime && runtime.hasLiveApi ? "本機更新" : "靜態快照";
     dom.lastUpdatedChip.textContent = updatedLabel ? `最後更新 ${updatedLabel}` : "最後更新載入中";
-    dom.heroCoverage.textContent = `${meta.count.toLocaleString()} 檔股票`;
     dom.statUniverse.textContent = meta.count.toLocaleString();
     dom.statListed.textContent = meta.tw.toLocaleString();
     dom.statOtc.textContent = meta.otc.toLocaleString();
@@ -363,11 +355,11 @@ export function createAppUi({ state, dom, runtime }) {
       (filteredRows.length ? `｜顯示第 ${start + 1}-${end} 檔` : "") +
       `｜依 ${SORT_LABELS[state.sortKey] || state.sortKey} 排序`;
 
+    dom.summaryUniverse.textContent = state.rows.length.toLocaleString();
     dom.summaryMatches.textContent = filteredRows.length.toLocaleString();
     dom.summaryFocus.textContent =
       state.view === "focus" ? filteredRows.length.toLocaleString() : filteredFocus.toLocaleString();
     dom.summaryWatch.textContent = totalWatch.toLocaleString();
-    dom.summaryView.textContent = VIEW_LABELS[state.view] || VIEW_LABELS.all;
 
     renderPager(filteredRows.length);
     renderSortIndicators();
