@@ -27,7 +27,7 @@ node --test tests/refresh-service.test.mjs
 node --test --test-name-pattern="writes blob" tests/refresh-service.test.mjs
 ```
 
-Node 20.x required. Pure ESM (`"type": "module"`). No bundler/build step — the frontend ships as raw ES modules.
+Node 24.x required (`engines` in `package.json`; CI runs Node 24). Pure ESM (`"type": "module"`). No bundler/build step — the frontend ships as raw ES modules.
 
 ## Architecture
 
@@ -73,7 +73,7 @@ If you ever hand-edit `data/latest-snapshot.json`, run `npm run sync:seed` to re
 
 ## Deployment
 
-Vercel, driven by **GitHub Actions** (`.github/workflows/vercel-deploy.yml`), not Vercel's native Git integration (`vercel.json` sets `git.deploymentEnabled: false`). Push to `main` → production; other branches → preview. The `verify` job runs `npm test`, `check:ui`, `check:deploy` before any deploy. A Vercel cron hits `/api/refresh` on a weekday schedule. `versions/`, `check-*.mjs`, `scripts/` are excluded from deploy via `.vercelignore`.
+Vercel, driven by **Vercel's native Git integration** (Git deployments are enabled — `check-vercel-deploy.mjs` asserts `vercel.json` does *not* set `git.deploymentEnabled: false`). Push to `main` → production; other branches / PRs → preview. The GitHub Actions workflow (`.github/workflows/vercel-deploy.yml`, internally named `CI`) is **verify-only**: its `verify` job runs `npm test`, `check:ui`, `check:deploy` on pull requests and pushes to `main`, and must *not* run `vercel deploy` (also asserted by the deploy check). A Vercel cron hits `/api/refresh` on a weekday schedule (`crons` in `vercel.json`). `versions/`, `check-*.mjs`, `scripts/`, `thumbnail.png` are excluded from deploy via `.vercelignore`.
 
 ## Conventions & gotchas
 

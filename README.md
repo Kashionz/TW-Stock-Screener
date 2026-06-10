@@ -1,98 +1,100 @@
 # TW Stock Screener
 
-Taiwan stock screening tool for filtering companies by revenue growth, profitability, EPS, valuation, and industry signals.
+台股篩選工具，依營收成長、獲利能力、EPS、估值與產業訊號篩選公司。
 
 ![TW Stock Screener](./thumbnail.png)
 
-## Overview
+## 總覽
 
-TW Stock Screener is a single-page stock screening app focused on Taiwan-listed companies. It combines monthly revenue growth, quarterly earnings, valuation data, and sector context into one interface for fast filtering and follow-up research.
+TW Stock Screener 是一款專注於台灣上市櫃公司的單頁式選股應用程式，將每月營收成長、每季財報、估值資料與產業脈絡整合於同一介面，方便快速篩選與後續研究。
 
-The UI is built as a static HTML app, while the latest dataset is served through lightweight serverless endpoints. When live data is unavailable, the app falls back to a bundled local snapshot so the screen still works.
+前端以靜態 HTML 應用程式建構，最新資料則透過輕量的 serverless 端點提供。當即時資料無法取得時，應用程式會退回到隨附的本地快照（snapshot），確保畫面仍可正常運作。
 
-## Features
+## 功能特色
 
-- Filter Taiwan stocks by revenue YoY, YTD YoY, gross margin, positive EPS, market, and industry.
-- Sort and search across the screened list.
-- Track watchlist items with local starred companies, notes, and phrase checklists stored in `localStorage`.
-- Inspect a per-stock detail drawer with charts, valuation data, EPS history, and reference links.
-- Refresh the latest dataset through a protected API endpoint when deployment secrets are configured.
+- 依營收 YoY、YTD YoY、毛利率、正 EPS、市場別與產業篩選台股。
+- 內建 **surge / focus（爆發 / 聚焦）** 模型：當營收 YoY ≥ 30% 或 YTD YoY ≥ 20% 時為 *surge* 候選；若在 surge 的基礎上又勾選了至少一項研究關鍵語句，則升級為 *focus* 候選。
+- 預設排除波動較大的產業（建材營造、金融保險業），以降低雜訊。
+- 可對篩選後的清單進行排序與搜尋。
+- 透過 `localStorage` 在本機追蹤觀察名單，包含星號標記公司、筆記與關鍵語句清單。
+- 開啟個股明細抽屜（drawer），檢視圖表、估值資料、EPS 歷史與參考連結。
+- 在設定好部署密鑰後，可透過受保護的 API 端點更新最新資料集。
 
-## Data Pipeline
+## 資料流程（Data Pipeline）
 
-- `index.html` contains the client UI shell and loads `assets/app/seed-snapshot.js` for offline or file-based viewing.
-- `api/snapshot.js` serves the best available snapshot with `no-store` caching.
-- `api/refresh.js` rebuilds the dataset from TWSE, TPEx, and MOPS sources, then writes the result to Vercel Blob storage.
-- `lib/snapshot-store.js` loads from Vercel Blob first and falls back to `data/latest-snapshot.json` if Blob storage is unavailable.
-- `data/latest-snapshot.json` and `assets/app/seed-snapshot.js` are kept in sync for local refresh and static-file fallback.
-- `vercel.json` defines the serverless function limits and the scheduled refresh job.
+- `index.html` 包含前端 UI 外殼，並載入 `assets/app/seed-snapshot.js` 以支援離線或檔案模式檢視。
+- `api/snapshot.js` 以 `no-store` 快取策略提供當前最佳的快照。
+- `api/refresh.js` 從 TWSE、TPEx 與 MOPS 來源重建資料集，並將結果寫入 Vercel Blob 儲存。
+- `lib/snapshot-store.js` 優先從 Vercel Blob 載入；當 Blob 儲存無法使用時，退回到 `data/latest-snapshot.json`。
+- `data/latest-snapshot.json` 與 `assets/app/seed-snapshot.js` 會保持同步，供本地更新與靜態檔案退回使用。
+- `vercel.json` 定義 serverless 函式的限制與排程更新工作。
 
-## Local Development
+## 本地開發
 
-### Prerequisites
+### 先決條件
 
 - Node.js 24.x
-- Vercel CLI is required before `npm run dev:vercel` can run successfully.
+- 執行 `npm run dev:vercel` 前需先安裝 Vercel CLI。
 
-### Install
+### 安裝
 
 ```bash
 npm install
 ```
 
-### Refresh the local snapshot
+### 更新本地快照
 
 ```bash
 npm run refresh:local
 ```
 
-### Sync the bundled file-mode snapshot only
+### 僅同步檔案模式的隨附快照
 
 ```bash
 npm run sync:seed
 ```
 
-Use this when `data/latest-snapshot.json` has already been updated and you only want to regenerate `assets/app/seed-snapshot.js` for `file://` fallback verification.
+當 `data/latest-snapshot.json` 已更新，而你只想重新產生 `assets/app/seed-snapshot.js` 以驗證 `file://` 退回行為時，使用此指令。
 
-### Daily Node workflow
+### 日常 Node 工作流程
 
-Set `REFRESH_SECRET` before testing `/api/refresh`, because the local refresh endpoint expects a bearer token that matches `REFRESH_SECRET` or `CRON_SECRET`.
+在測試 `/api/refresh` 前請先設定 `REFRESH_SECRET`，因為本地更新端點預期收到與 `REFRESH_SECRET` 或 `CRON_SECRET` 相符的 bearer token。
 
 ```bash
 REFRESH_SECRET=your-secret npm run dev
 ```
 
-`npm run dev` starts the pure Node.js local server at `http://127.0.0.1:3000` by default. This workflow serves:
+`npm run dev` 預設會在 `http://127.0.0.1:3000` 啟動純 Node.js 本地伺服器。此工作流程提供：
 
-- `/` for the static app shell
-- `/api/snapshot` for the latest local snapshot payload
-- `/api/refresh` for rebuilding data and writing the refreshed snapshot back to `data/latest-snapshot.json`
+- `/`：靜態應用程式外殼
+- `/api/snapshot`：最新的本地快照內容
+- `/api/refresh`：重建資料並將更新後的快照寫回 `data/latest-snapshot.json`
 
-This is the daily local development path when you want to work against the app and API routes without going through the Vercel runtime.
-`npm run dev` intentionally reads the local snapshot file directly; if you need the Blob-first "best snapshot" behavior, use `npm run dev:vercel`.
+當你想針對應用程式與 API 路由開發，而不經過 Vercel 執行環境時，這是日常的本地開發路徑。
+`npm run dev` 會刻意直接讀取本地快照檔案；若你需要 Blob 優先的「最佳快照」行為，請改用 `npm run dev:vercel`。
 
-### Vercel compatibility verification
+### Vercel 相容性驗證
 
 ```bash
 npm run dev:vercel
 ```
 
-`npm run dev:vercel` runs `vercel dev` and is the formal compatibility check for the deployed runtime. It should be used to verify that the local behavior still matches the intended Vercel execution path, including the Blob-backed snapshot strategy.
+`npm run dev:vercel` 會執行 `vercel dev`，是針對已部署執行環境的正式相容性檢查。用於驗證本地行為是否仍與預期的 Vercel 執行路徑一致，包含 Blob 後端的快照策略。
 
-Because `npm run dev:vercel` shells out to the Vercel CLI, installing and authenticating `vercel` is a prerequisite for this verification mode.
+由於 `npm run dev:vercel` 會呼叫 Vercel CLI，安裝並完成 `vercel` 驗證是使用此模式的先決條件。
 
-### Static file fallback
+### 靜態檔案退回
 
-You can still open `index.html` directly in a browser. In file mode, the page works with the bundled snapshot loaded from `assets/app/seed-snapshot.js`, but there is no live `/api/snapshot` or `/api/refresh` behavior.
+你仍可直接在瀏覽器中開啟 `index.html`。在檔案模式下，頁面會使用從 `assets/app/seed-snapshot.js` 載入的隨附快照運作，但不會有即時的 `/api/snapshot` 或 `/api/refresh` 行為。
 
-## Environment Variables
+## 環境變數
 
-- `BLOB_READ_WRITE_TOKEN`: Required for reading and writing the latest snapshot in Vercel Blob.
-- `CRON_SECRET`: Optional secret for authorizing scheduled refresh requests.
-- `REFRESH_SECRET`: Optional secret for manual refresh requests from the UI.
-- `SNAPSHOT_BLOB_PATH`: Optional Blob path override. Defaults to `twse-screener/latest.json`.
+- `BLOB_READ_WRITE_TOKEN`：在 Vercel Blob 中讀寫最新快照的必要變數。
+- `CRON_SECRET`：用於授權排程更新請求的選用密鑰。
+- `REFRESH_SECRET`：用於從 UI 手動更新請求的選用密鑰。
+- `SNAPSHOT_BLOB_PATH`：選用的 Blob 路徑覆寫值，預設為 `twse-screener/latest.json`。
 
-## Validation
+## 驗證
 
 ```bash
 npm test
@@ -100,20 +102,20 @@ npm run check:ui
 npm run check:deploy
 ```
 
-Use `npm run dev` for the daily Node-based smoke test, then `npm run dev:vercel` when the Vercel CLI is available and you need the deployment-compatible verification path.
+日常以 `npm run dev` 進行 Node 為基礎的快速煙霧測試（smoke test）；當 Vercel CLI 可用且需要與部署相容的驗證路徑時，再使用 `npm run dev:vercel`。
 
-## Data Sources
+## 資料來源
 
-- TWSE open data
-- TPEx open data
-- MOPS monthly revenue and income statement data
+- TWSE 開放資料
+- TPEx 開放資料
+- MOPS 每月營收與損益表資料
 
-## Deployment Notes
+## 部署說明
 
-- The project is configured for Vercel.
-- Connect the GitHub repository directly in Vercel to enable automatic Preview deployments for branches and pull requests.
-- Set the production branch in Vercel to `main` so merges to `main` create production deployments automatically.
-- Configure runtime secrets such as `BLOB_READ_WRITE_TOKEN`, `CRON_SECRET`, and `REFRESH_SECRET` in the Vercel project settings instead of GitHub Actions secrets.
-- The GitHub Actions workflow now runs verification only; Vercel handles the actual deployments from the connected repository.
-- Scheduled refresh is defined in `vercel.json`.
-- Historical HTML snapshots under `versions/` are kept in the repository, but excluded from Vercel deployment via `.vercelignore`.
+- 本專案已設定為使用 Vercel。
+- 在 Vercel 直接連結 GitHub 儲存庫，即可為分支與 pull request 啟用自動的 Preview 部署。
+- 在 Vercel 將正式環境分支設為 `main`，使合併至 `main` 時自動建立正式環境部署。
+- 將 `BLOB_READ_WRITE_TOKEN`、`CRON_SECRET`、`REFRESH_SECRET` 等執行環境密鑰設定於 Vercel 專案設定中，而非 GitHub Actions secrets。
+- GitHub Actions workflow 目前僅執行驗證；實際部署由連結的儲存庫透過 Vercel 處理。
+- 排程更新定義於 `vercel.json`。
+- `versions/` 下的歷史 HTML 快照會保留在儲存庫中，但透過 `.vercelignore` 排除於 Vercel 部署之外。
